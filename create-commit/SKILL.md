@@ -40,7 +40,9 @@ Stop at the first matching rule:
 1. Detect whether the user explicitly named file paths.
 2. Apply the file selection rule.
 3. Check for `COMMIT_GUIDELINES.md`. If absent, skim recent commits **only** for scope conventions.
-4. Draft the commit message and present it to the user before committing.
+4. Decide whether to confirm based on the current execution mode:
+   - **Non-interactive** (e.g. Codex `never` approval policy, or any headless/auto mode where the user cannot reply): **commit directly without printing a draft or waiting for confirmation.**
+   - **Interactive** (any mode where the user can reply): present the commit message draft and wait for confirmation before committing.
 5. Run the commit, then print a summary: `git show --stat --oneline -1`.
 
 ## Suggested commands

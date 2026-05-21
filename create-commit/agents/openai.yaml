@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Commit"
+  short_description: "Commit explicit, staged, or all changes; defaults to Conventional Commits in English."
+  default_prompt: "Use $create-commit to commit explicit files, staged changes, or all workspace changes. Follow COMMIT_GUIDELINES.md when present; otherwise default to Conventional Commits in English with a single-line subject."
