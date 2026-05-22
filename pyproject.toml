@@ -1,0 +1,14 @@
+[project]
+name = "codex-skills"
+version = "0.1.0"
+description = "Local tooling for maintaining Codex skill directories."
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyyaml>=6.0.2",
+]
+
+[tool.uv]
+package = false

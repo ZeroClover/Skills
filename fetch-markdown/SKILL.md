@@ -22,16 +22,16 @@ Fetch rendered web pages as Markdown, so agents can read content without filling
 
 ## How to call
 
-Use the bundled `fetch.sh` script from this Skill directory. Resolve the path relative to `SKILL.md`; do not assume the current working directory is the Skill parent. In examples, `$SKILL_DIR` means the resolved directory containing this `SKILL.md`.
+Use the bundled `scripts/fetch.sh` script from this Skill directory. Resolve the path relative to `SKILL.md`; do not assume the current working directory is the Skill parent. In examples, `$SKILL_DIR` means the resolved directory containing this `SKILL.md`.
 
 ```bash
-"$SKILL_DIR/fetch.sh" "https://example.com/docs/page"
+"$SKILL_DIR/scripts/fetch.sh" "https://example.com/docs/page"
 ```
 
 For long pages, write Markdown to a file and read only the needed sections:
 
 ```bash
-MD_PATH="$("$SKILL_DIR/fetch.sh" "https://example.com/long-doc" --output-format file)"
+MD_PATH="$("$SKILL_DIR/scripts/fetch.sh" "https://example.com/long-doc" --output-format file)"
 ```
 
 ## Inputs and output
@@ -46,7 +46,7 @@ The script accepts credentials from flags, environment variables, or 1Password r
 - API token: `--op-reference <op://...>` > `--api-key <token>` > `CLOUDFLARE_API_TOKEN` > built-in 1Password reference.
 - Account ID: `--op-account-reference <op://...>` > `--account-id <id>` > `CLOUDFLARE_ACCOUNT_ID` > built-in 1Password reference.
 - Prefer 1Password or environment variables for secrets. `--api-key` is useful for testing, but command-line arguments may appear in shell history or process lists.
-- If the user asks to persist new defaults, edit `DEFAULT_OP_ACCOUNT_ID` or `DEFAULT_OP_API_TOKEN` at the top of `fetch.sh`; do not record secrets in `SKILL.md`.
+- If the user asks to persist new defaults, edit `DEFAULT_OP_ACCOUNT_ID` or `DEFAULT_OP_API_TOKEN` at the top of `scripts/fetch.sh`; do not record secrets in `SKILL.md`.
 
 Cloudflare's quick-action docs call the token permission `Browser Rendering - Edit`; the API reference lists the accepted permission as `Browser Rendering Write`. Use an API token with that Browser Rendering write/edit permission.
 
@@ -67,7 +67,7 @@ Do not add one-off Cloudflare Browser Rendering options unless they directly imp
 JavaScript-heavy page with a known content selector:
 
 ```bash
-"$SKILL_DIR/fetch.sh" "https://example.com/app-docs" \
+"$SKILL_DIR/scripts/fetch.sh" "https://example.com/app-docs" \
   --wait-for-selector "main article" \
   --output-format file
 ```
@@ -75,14 +75,14 @@ JavaScript-heavy page with a known content selector:
 Disable endpoint caching when checking changing documentation:
 
 ```bash
-"$SKILL_DIR/fetch.sh" "https://example.com/latest-docs" --cache-ttl 0
+"$SKILL_DIR/scripts/fetch.sh" "https://example.com/latest-docs" --cache-ttl 0
 ```
 
 Use environment credentials without 1Password:
 
 ```bash
 CLOUDFLARE_ACCOUNT_ID="..." CLOUDFLARE_API_TOKEN="..." \
-  "$SKILL_DIR/fetch.sh" "https://example.com"
+  "$SKILL_DIR/scripts/fetch.sh" "https://example.com"
 ```
 
 ## Dependencies and failures
