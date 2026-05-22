@@ -1,7 +1,6 @@
 ---
 name: fetch-markdown
 description: Fetch web pages as Markdown via Cloudflare Browser Rendering API instead of the built-in WebFetch tool, to drastically reduce token usage. Use this for documentation, blog posts, API references, articles — any task where the goal is reading content. Do NOT use this when the task requires inspecting raw HTML, CSS, JS, or DOM structure.
-user-invocable: false
 ---
 
 # fetch-markdown

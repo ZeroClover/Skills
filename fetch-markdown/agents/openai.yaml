@@ -1,4 +1,0 @@
-interface:
-  display_name: "Fetch Markdown"
-  short_description: "Fetch web pages as Markdown via Cloudflare Browser Rendering to save tokens."
-  default_prompt: "Use $fetch-markdown to fetch a web page as Markdown via the Cloudflare Browser Rendering API instead of the built-in web fetch tool. Best for documentation, blog posts, API references, or long articles where the goal is reading content."
