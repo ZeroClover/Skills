@@ -1,67 +1,94 @@
 ---
 name: fetch-markdown
-description: Fetch web pages as Markdown via Cloudflare Browser Rendering API instead of the built-in WebFetch tool, to drastically reduce token usage. Use this for documentation, blog posts, API references, articles — any task where the goal is reading content. Do NOT use this when the task requires inspecting raw HTML, CSS, JS, or DOM structure.
+description: Fetch rendered web pages as Markdown via Cloudflare Browser Rendering API to reduce context usage. Use this for reading documentation, blog posts, API references, articles, and other page content. Do not use it when the task requires raw HTML/CSS/JS, DOM attributes, browser UI interaction, local HTML files, or frontend rendering inspection.
 ---
 
 # fetch-markdown
 
-Fetch web pages as Markdown using Cloudflare Browser Rendering API to avoid spending tokens on HTML tags, inline CSS, and JS.
+Fetch rendered web pages as Markdown, so agents can read content without filling the context window with HTML, CSS, and JavaScript noise.
 
 ## When to use
 
-- Fetching documentation, blog posts, API references, or articles **to read the content**
-- User says things like "summarize this page", "check what this doc says", "look up this library's docs"
+- Reading documentation, blog posts, API references, articles, or rendered site content.
+- User asks to summarize a page, check what docs say, compare article content, or look up library documentation.
+- A normal HTTP fetch would miss content because the page needs JavaScript rendering.
 
-## When NOT to use
+## When not to use
 
-- Inspecting raw HTML structure, debugging frontend rendering
-- Extracting meta tags, inline scripts, or DOM attributes
-- The URL already returns JSON or plain text (just use `curl`)
-
-In those cases, fall back to the built-in WebFetch or `curl`.
+- Inspecting raw HTML structure, CSS, JavaScript, meta tags, scripts, DOM attributes, or frontend rendering behavior.
+- Clicking through UI, filling forms, debugging local browser layout, taking screenshots, or interacting with a page.
+- Processing local HTML files or raw HTML strings. If the HTML is already local, read or convert it with ordinary local tooling instead.
+- URLs that already return JSON, plain text, or another machine-readable API response; use the current environment's HTTP or browser tools instead.
 
 ## How to call
 
-**Always use the bundled `fetch.sh` script.** Do not hand-roll `curl` calls — the script already handles JSON body construction, credential resolution via 1Password CLI, and stdout-vs-file output.
-
-```
-fetch.sh <url> [options]
-```
-
-Options:
-
-- `--api-key <token>` — plaintext Cloudflare API token.
-- `--op-reference <op://...>` — 1Password CLI reference for the API token. **Takes precedence over `--api-key`** if both are given. Defaults to a built-in reference baked into the script, so in the normal case you can omit both flags entirely.
-- `--output-format <stdout|file>` — default `stdout`. Use `file` for long pages to keep Markdown out of the conversation context; the script prints the file path, then `Read` it on demand.
-- `--output-file-path <path>` — destination file when `--output-format=file`. If omitted, a temp file is created via `mktemp` and its path is printed.
-
-### Typical usage
-
-Short page, content goes straight into context:
+Use the bundled `fetch.sh` script from this Skill directory. Resolve the path relative to `SKILL.md`; do not assume the current working directory is the Skill parent. In examples, `$SKILL_DIR` means the resolved directory containing this `SKILL.md`.
 
 ```bash
-./fetch-markdown/fetch.sh "https://example.com/docs/page"
+"$SKILL_DIR/fetch.sh" "https://example.com/docs/page"
 ```
 
-Long page, save to a temp file and read selectively:
+For long pages, write Markdown to a file and read only the needed sections:
 
 ```bash
-MD_PATH="$(./fetch-markdown/fetch.sh "https://example.com/long-doc" --output-format file)"
-# then use Read on "$MD_PATH"
+MD_PATH="$("$SKILL_DIR/fetch.sh" "https://example.com/long-doc" --output-format file)"
 ```
 
-Override the token source (e.g. testing with a fresh token):
+## Inputs and output
 
-```bash
-./fetch-markdown/fetch.sh "https://example.com" --op-reference "op://Private/Other Vault/Token"
-```
+- Input: a web URL, passed positionally or with `--url <url>`.
+- Output: default `stdout`; use `--output-format file` and optionally `--output-file-path <path>` for long pages.
 
 ## Credentials
 
-The script has built-in 1Password references for both the Cloudflare Account ID and the API Token, so no credential flag is required in the default setup. If `op read` fails (vault locked, reference missing, `op` not installed), the script exits with a clear error — surface that to the user and let them either unlock 1Password or pass `--api-key` directly.
+The script accepts credentials from flags, environment variables, or 1Password references.
 
-When the user supplies new credentials and asks to persist them, edit `DEFAULT_OP_ACCOUNT_ID` / `DEFAULT_OP_API_TOKEN` at the top of `fetch.sh` rather than recording them here.
+- API token: `--op-reference <op://...>` > `--api-key <token>` > `CLOUDFLARE_API_TOKEN` > built-in 1Password reference.
+- Account ID: `--op-account-reference <op://...>` > `--account-id <id>` > `CLOUDFLARE_ACCOUNT_ID` > built-in 1Password reference.
+- Prefer 1Password or environment variables for secrets. `--api-key` is useful for testing, but command-line arguments may appear in shell history or process lists.
+- If the user asks to persist new defaults, edit `DEFAULT_OP_ACCOUNT_ID` or `DEFAULT_OP_API_TOKEN` at the top of `fetch.sh`; do not record secrets in `SKILL.md`.
 
-## Response shape
+Cloudflare's quick-action docs call the token permission `Browser Rendering - Edit`; the API reference lists the accepted permission as `Browser Rendering Write`. Use an API token with that Browser Rendering write/edit permission.
 
-On success the script prints either the Markdown body (stdout mode) or the path to a file containing it (file mode). On failure it prints the full Cloudflare error JSON to stderr and exits non-zero — surface those errors verbatim when reporting back. Common causes: insufficient token permissions, wrong account ID, target URL unreachable.
+## Page loading options
+
+The script intentionally exposes only the loading options that usually help when reading web content:
+
+- `--wait-until load|domcontentloaded|networkidle0|networkidle2` tunes the browser navigation wait. Default is `networkidle0`, which is a good default for rendered docs. A JSON array of those values is also accepted.
+- `--wait-for-selector <css>` waits for a known content selector, such as `main article`, when a documentation site is a SPA or renders content late.
+- `--wait-for-selector-timeout <ms>` adjusts that selector wait, up to Cloudflare's documented 120000 ms limit.
+- `--goto-timeout <ms>` adjusts the navigation timeout, up to Cloudflare's documented 60000 ms limit.
+- `--cache-ttl <seconds>` controls Cloudflare's endpoint cache via the API query parameter; `0` disables the cache, and the documented maximum is 86400 seconds.
+
+Do not add one-off Cloudflare Browser Rendering options unless they directly improve the core task of reading page content as Markdown and are reviewed as part of the Skill contract. For browser debugging or interaction, use a browser-specific tool instead.
+
+## Examples
+
+JavaScript-heavy page with a known content selector:
+
+```bash
+"$SKILL_DIR/fetch.sh" "https://example.com/app-docs" \
+  --wait-for-selector "main article" \
+  --output-format file
+```
+
+Disable endpoint caching when checking changing documentation:
+
+```bash
+"$SKILL_DIR/fetch.sh" "https://example.com/latest-docs" --cache-ttl 0
+```
+
+Use environment credentials without 1Password:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID="..." CLOUDFLARE_API_TOKEN="..." \
+  "$SKILL_DIR/fetch.sh" "https://example.com"
+```
+
+## Dependencies and failures
+
+Required commands: `bash`, `curl`, and `jq`. `op` is required only when resolving `op://` references.
+
+On success, stdout contains either the Markdown body or the output file path. On failure, the script exits non-zero and prints Cloudflare's error JSON to stderr when available. Common causes are missing dependencies, locked or missing 1Password references, insufficient Browser Rendering permission, wrong account ID, rate limiting, target URL failures, or page load timeouts.
+
+Official references: [Cloudflare Markdown quick action](https://developers.cloudflare.com/browser-run/quick-actions/markdown-endpoint/) and [Cloudflare Markdown API reference](https://developers.cloudflare.com/api/resources/browser_rendering/subresources/markdown/methods/create/).
