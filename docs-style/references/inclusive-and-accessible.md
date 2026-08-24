@@ -4,23 +4,23 @@ This reference covers terminology, pronouns, and the practices that make documen
 
 ## Terminology
 
-Use precise, neutral terms. The table lists the recommended term first and the term it replaces, for use when you review existing text.
+Use precise, neutral terms that describe the technical relationship or action.
 
-| Use | In place of | Context |
-| :--- | :--- | :--- |
-| `allowlist`, `denylist` | `whitelist`, `blacklist` | Access control, filtering |
-| `primary` / `replica`, `main` / `worker`, `leader` / `follower` | `master` / `slave` | Replication, clusters, CI runners |
-| `main branch`, `default branch` | `master branch` | Version control |
-| `smoke test`, `preflight check`, `validation` | `sanity check` | Testing |
-| `sample value`, `placeholder`, `test fixture` | `dummy value` | Examples and tests |
-| `legacy`, `exempt` | `grandfathered` | Billing and feature access |
-| `built-in`, `integrated` | `native` (as in "native support") | Feature descriptions |
-| `person-hours`, `engineering time` | `man-hours` | Estimates |
-| `everyone`, `team`, `developers` | `guys` | Addressing readers |
-| `institutional knowledge` | `tribal knowledge` | Documentation gaps |
-| `disable`, `degrade`, `limit` | `cripple` | Impact descriptions |
+| Context | Preferred terms |
+| :--- | :--- |
+| Access control and filtering | `allowlist`, `denylist`, allow, block |
+| Replication, clusters, and workers | `primary` / `replica`, `main` / `worker`, `leader` / `follower` |
+| Version control | `main branch`, `default branch` |
+| Testing | `smoke test`, `preflight check`, `validation` |
+| Examples and tests | `sample value`, `placeholder`, `test fixture` |
+| Billing and feature access | `legacy`, `exempt` |
+| Feature descriptions | `built-in`, `integrated` |
+| Estimates | `person-hours`, `engineering time` |
+| Addressing readers | `everyone`, `team`, `developers` |
+| Documentation gaps | `institutional knowledge` |
+| Software impact | `disable`, `degrade`, `limit` |
 
-When an external tool, API, or protocol uses one of the replaced terms as an identifier, quote the identifier in code font (`git checkout master`) and use the neutral term in your own sentences.
+When an external tool, API, or protocol supplies an exact identifier, preserve it in code font and use the preferred project term in surrounding prose.
 
 ## Pronouns
 
@@ -40,7 +40,8 @@ Put the link on the noun phrase that names the target, and keep the sentence rea
 
 ## Images
 
-- Give every image alt text that states what the image shows and, for diagrams, what it conveys: `alt="Request flow from the client through the API gateway to the auth and billing services."`
+- Give an informative image concise alt text that states its purpose and, for diagrams, what it conveys: `alt="Request flow from the client through the API gateway to the auth and billing services."`
+- Give a decorative image or a visual repetition of nearby text an empty alt attribute: `alt=""`.
 - Put any instruction that appears inside an image into the body text as well.
 - Use screenshots for orientation, and carry the actual steps in the numbered list.
 
@@ -49,6 +50,13 @@ Put the link on the noun phrase that names the target, and keep the sentence rea
 - Include a header row so that screen readers can announce column names.
 - Fill every cell.
 - Carry meaning in text as well as color: mark required parameters with a **Required** column or the word "Required".
+
+## Reading and interaction
+
+- Provide a keyboard-accessible route through an interactive task.
+- Refer to controls by label, accessible name, tooltip, or stable surrounding context.
+- Use reading-order references such as "the following table" and "the preceding diagram".
+- Put the distinguishing information in the first sentence of a paragraph.
 
 ## Words about people and abilities
 

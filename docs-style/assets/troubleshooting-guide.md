@@ -11,7 +11,7 @@ Before you investigate a specific error, confirm the basics:
    [tool-name] --version
    ```
 2. Check the [status page](https://status.example.com) for ongoing incidents.
-3. Confirm that outbound traffic on ports `443` and `[PORT]` is allowed from your network.
+3. Confirm that outbound traffic on ports `443` and *`PORT`* is allowed from your network.
 4. Collect the logs with debug output turned on:
    ```bash
    [tool-name] logs --level=debug

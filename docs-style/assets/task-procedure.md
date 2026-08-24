@@ -30,7 +30,7 @@ To [perform the main action]:
 
 1. In the [console or UI area], go to the **[Page name]** page.
 2. Click **[Button name]**.
-3. In the **[Field label]** field, enter `[SAMPLE_VALUE]`.
+3. In the **[Field label]** field, enter *`SAMPLE_VALUE`*.
 4. From the **[List label]** list, select **[Option name]**.
 5. Optional: Select the **[Checkbox label]** checkbox.
 6. Click **[Submit button name]**. [Result, for example: The console creates the resource and opens the **Resource details** page.]
@@ -48,8 +48,8 @@ To verify that the [resource] is working:
      -H "Authorization: Bearer API_KEY"
    ```
    Replace the following:
-   - `RESOURCE_ID`: the ID returned when you created the resource
-   - `API_KEY`: an access token generated in the console
+   - *`RESOURCE_ID`*: the ID returned when you created the resource
+   - *`API_KEY`*: an access token generated in the console
 2. Confirm that the response returns `200 OK` and the resource payload:
    ```json
    {

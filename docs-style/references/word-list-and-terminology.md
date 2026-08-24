@@ -33,7 +33,7 @@ The words `once`, `since`, and `while` each carry a time-related meaning as well
 | set up | setup |
 | back up | backup |
 | sign in | sign-in (adjective), login (noun) |
-| plug in | plugin |
+| plug in | plugin (noun), plug-in (adjective) |
 | shut down | shutdown |
 | time out | timeout |
 | check out | checkout |
@@ -46,6 +46,8 @@ The words `once`, `since`, and `while` each carry a time-related meaning as well
 - For lists and menus, write `list` or `menu`; the qualifier `drop-down` can usually be omitted: "From the **Region** list, select **us-central1**."
 
 Spell out an abbreviation the first time it appears on a page, with the abbreviation in parentheses: "Identity and Access Management (IAM)". Widely known abbreviations such as API, URL, and HTTP need no expansion.
+
+Use the product's exact UI label or command terminology where it differs from the general word choice. For example, a tool whose interface says **Log in** keeps that label in its procedure.
 
 ## Punctuation
 

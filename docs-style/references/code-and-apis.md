@@ -48,7 +48,8 @@ async function downloadObject(bucketName: string, objectName: string, destinatio
 
 ## Command lines
 
-- Show a command the reader will copy without a shell prompt, so that it pastes cleanly.
+- For a one-line command, choose whether to show the shell prompt and use that choice consistently across the document.
+- When one block contains multiple input lines, begin each input line with the prompt indicator. Keep the prompt visually separate from the selectable command when the renderer supports it.
 - Show command output in a separate block, introduced by a sentence.
 - Break long commands with a backslash and indent continuation lines.
 
@@ -70,9 +71,9 @@ The command prints the container ID:
 ## Placeholders
 
 - Write placeholders in uppercase with underscores: `PROJECT_ID`, `BUCKET_NAME`, `API_KEY`.
-- Name the thing itself; `API_KEY` says as much as a longer possessive form.
-- Keep placeholders in code font, both in code blocks and in prose.
-- Explain placeholders directly after the sample. For one placeholder: "Replace `PROJECT_ID` with your project ID." For several, list them in order of appearance:
+- Name the thing itself; `API_KEY` carries the needed meaning.
+- In Markdown prose, format a replaceable value as italic code: *`PROJECT_ID`*. In a fenced code block, write the uppercase placeholder directly.
+- Explain placeholders directly after the sample. For one placeholder: "Replace *`PROJECT_ID`* with your project ID." For several, list them in order of appearance:
 
 ```bash
 curl -X POST https://api.example.com/v2/projects/PROJECT_ID/deploy \
@@ -82,9 +83,9 @@ curl -X POST https://api.example.com/v2/projects/PROJECT_ID/deploy \
 
 Replace the following:
 
-- `PROJECT_ID`: your project identifier
-- `API_KEY`: an access token generated in the console
-- `ENVIRONMENT_NAME`: the target environment, such as `staging` or `production`
+- *`PROJECT_ID`*: your project identifier
+- *`API_KEY`*: an access token generated in the console
+- *`ENVIRONMENT_NAME`*: the target environment, such as `staging` or `production`
 
 ## Example values
 

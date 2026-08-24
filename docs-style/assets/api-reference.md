@@ -18,7 +18,7 @@ Every endpoint requires a bearer token in the `Authorization` header:
 Authorization: Bearer API_KEY
 ```
 
-Replace `API_KEY` with a token generated in the console.
+Replace *`API_KEY`* with a token generated in the console.
 
 ## [Operation in sentence case, for example: Create a customer]
 
@@ -30,7 +30,7 @@ Creates a customer profile and initializes default billing settings.
 
 | Header | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `Authorization` | string | Yes | A bearer token in the form `Bearer API_KEY`. |
+| `Authorization` | string | Yes | A bearer token that uses the `Bearer` scheme and the *`API_KEY`* placeholder. |
 | `Content-Type` | string | Yes | Set to `application/json`. |
 | `Idempotency-Key` | string | No | A UUID that makes retries of the same request safe. |
 
@@ -83,5 +83,5 @@ The following table lists the error responses for this endpoint:
 | :--- | :--- | :--- | :--- |
 | `400 Bad Request` | `invalid_email` | The email address is malformed. | Provide an RFC 5322 email address. |
 | `401 Unauthorized` | `invalid_token` | The API key is missing or expired. | Generate a new key in the console. |
-| `409 Conflict` | `customer_exists` | A customer with this email already exists. | Retrieve the record with `GET /customers?email=EMAIL`. |
+| `409 Conflict` | `customer_exists` | A customer with this email already exists. | Retrieve the record with `GET /customers?email=`*`EMAIL`*. |
 | `429 Too Many Requests` | `rate_limit_exceeded` | The request quota is exhausted. | Retry with exponential backoff. |

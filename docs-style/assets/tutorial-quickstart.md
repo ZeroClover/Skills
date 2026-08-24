@@ -1,6 +1,6 @@
 # [Quickstart title in sentence case, for example: Quickstart: Deploy a REST API to Cloud Run]
 
-In this quickstart, you build a small HTTP service, deploy it to [Target platform], and send a test request. The whole process takes about 15 minutes.
+In this quickstart, you build a small HTTP service, deploy it to [Target platform], and send a test request. The process takes about [estimated duration].
 
 ## Objectives
 
@@ -94,9 +94,9 @@ To confirm that the deployed service responds:
 
 1. Send a request to the health endpoint:
    ```bash
-   curl -i https://SERVICE_URL/health
+   curl -i SERVICE_URL/health
    ```
-   Replace `SERVICE_URL` with the URL printed by the deploy command.
+   Replace *`SERVICE_URL`* with the URL printed by the deploy command.
 2. Confirm that the response returns `200 OK` and the health payload:
    ```json
    {

@@ -2,10 +2,10 @@
 """Lint Markdown prose against Google developer documentation style rules.
 
 Usage:
-    python3 lint_docs.py PATH [PATH ...] [--json] [--strict] [--ignore-rules IDS]
+    uv run --project SKILL_PARENT python lint_docs.py PATH [PATH ...] [--json] [--strict] [--ignore-rules IDS]
 
-Checks fenced code blocks and inline code are skipped. Each finding names the
-rule, the matched text, and the preferred wording.
+Fenced code blocks and inline code are skipped. Each finding names the rule,
+the matched text, and the preferred wording.
 """
 
 import argparse
@@ -21,123 +21,79 @@ RULES = [
         "name": "Filler adverbs",
         "severity": "WARNING",
         "regex": r"\b(simply|just|easily|easy|obviously|of course|clearly|very simple|a breeze|quickly)\b",
-        "message": "'{match}' comments on difficulty. State the instruction on its own.",
-        "fix": "Remove the word, or replace the sentence with a direct imperative.",
+        "guidance": "Use a direct imperative or a measurable estimate of the work.",
     },
     {
         "id": "GDG-002",
         "name": "Hype",
         "severity": "WARNING",
         "regex": r"\b(robust|powerful|blazing[- ]fast|cutting-edge|industry-leading|ultra-fast|ultra-secure|seamless(?:ly)?|magic|super easy|best-in-class|world-class)\b",
-        "message": "'{match}' is a judgment. Give a measurable fact instead.",
-        "fix": "Replace with a specification, number, or concrete capability.",
+        "guidance": "State a specification, number, or concrete capability.",
     },
     {
         "id": "GDG-010",
         "name": "Terminology: allowlist and denylist",
         "severity": "ERROR",
         "regex": r"\b(whitelist(?:ed|ing|s)?|blacklist(?:ed|ing|s)?)\b",
-        "message": "Use 'allowlist' or 'denylist' in place of '{match}'.",
-        "fix": "Replace with 'allowlist' / 'denylist' (or 'permitlist' / 'blocklist').",
+        "guidance": "Use 'allowlist' and 'denylist', or describe the allow and block behavior directly.",
     },
     {
         "id": "GDG-011",
         "name": "Terminology: primary and replica",
         "severity": "WARNING",
         "regex": r"\b(master|slave)\b",
-        "message": "Use 'primary' / 'replica', 'main' / 'worker', or 'leader' / 'follower' in place of '{match}'. Keep external identifiers such as branch names in code font.",
-        "fix": "Replace with the neutral pair that fits the context, or put an unavoidable identifier in code font.",
+        "guidance": "Use the technical relationship that fits the context, such as 'primary' / 'replica', 'main' / 'worker', or 'leader' / 'follower'. Preserve exact external identifiers in code font.",
     },
     {
         "id": "GDG-012",
         "name": "Terminology: other",
         "severity": "ERROR",
         "regex": r"\b(sanity check|dummy (?:data|value|values)|grandfathered|man-hours|manpower|tribal knowledge)\b",
-        "message": "Use a neutral term in place of '{match}'.",
-        "fix": "Use 'smoke test' for 'sanity check', 'sample value' or 'placeholder' for 'dummy', 'legacy' for 'grandfathered', 'person-hours' for 'man-hours', 'institutional knowledge' for 'tribal knowledge'.",
+        "guidance": "Choose the precise term for the context: 'smoke test', 'sample value', 'placeholder', 'legacy', 'person-hours', or 'institutional knowledge'.",
     },
     {
         "id": "GDG-020",
         "name": "Time-bound words",
         "severity": "WARNING",
         "regex": r"\b(currently|at present|as of now|at this time|in the future|soon|upcoming|recently|newly)\b",
-        "message": "'{match}' anchors the sentence to a moment. Describe the behavior as a plain present-tense fact.",
-        "fix": "Remove the word, or state the version or date where timing matters.",
+        "guidance": "Describe stable behavior in present tense. State the version or date when timing carries meaning.",
     },
     {
         "id": "GDG-030",
         "name": "Link text",
         "severity": "ERROR",
         "regex": r"\[(click here|here|link|this link|this page|this doc|this document|read more|learn more|more info|more)\]\([^)]+\)",
-        "message": "Link text '{match}' reads the same for every link. Name the destination.",
-        "fix": "Use the title or subject of the target page as the link text.",
+        "guidance": "Use the title or subject of the destination as the link text.",
     },
     {
         "id": "GDG-040",
         "name": "Word list: cannot",
         "severity": "WARNING",
         "regex": r"\bcan not\b",
-        "message": "Use 'cannot' as one word.",
-        "fix": "Change 'can not' to 'cannot'.",
+        "guidance": "Write 'cannot' as one word.",
     },
     {
         "id": "GDG-041",
         "name": "Word list: Latin abbreviations",
         "severity": "WARNING",
         "regex": r"(?<![\w.])(e\.g\.|i\.e\.|etc\.|vs\.)(?!\w)",
-        "message": "Use plain English in place of '{match}'.",
-        "fix": "Use 'for example' or 'such as' for 'e.g.', 'that is' for 'i.e.', a complete list or 'such as' for 'etc.', 'versus' for 'vs.'.",
+        "guidance": "Use 'for example', 'such as', 'that is', a complete list, or 'versus', according to the meaning.",
     },
     {
         "id": "GDG-042",
         "name": "Word list: and/or",
         "severity": "WARNING",
         "regex": r"\band/or\b",
-        "message": "Use 'or', or spell out 'A, B, or both'.",
-        "fix": "Replace 'and/or' with 'or', or rephrase as 'A, B, or both'.",
+        "guidance": "Write 'or', or state the inclusive choices as 'A, B, or both'.",
     },
     {
         "id": "GDG-043",
         "name": "Word list: filename",
         "severity": "WARNING",
         "regex": r"\bfile name\b",
-        "message": "Use 'filename' as one word.",
-        "fix": "Change 'file name' to 'filename'.",
-    },
-    {
-        "id": "GDG-044",
-        "name": "Word list: please",
-        "severity": "WARNING",
-        "regex": r"\bplease\b",
-        "message": "Instructions read more directly without 'please'.",
-        "fix": "Remove 'please' and keep the imperative verb.",
-    },
-    {
-        "id": "GDG-045",
-        "name": "Word list: sign in",
-        "severity": "WARNING",
-        "regex": r"\b(log in|log into|logging in|logged in|log out|logging out|logged out)\b",
-        "message": "Use 'sign in' / 'sign out' for the verb in place of '{match}'.",
-        "fix": "Change 'log in' to 'sign in' and 'log out' to 'sign out'. Keep 'login' as a noun or adjective.",
-    },
-    {
-        "id": "GDG-050",
-        "name": "Serial comma",
-        "severity": "WARNING",
-        "regex": r"\b([A-Za-z0-9_-]+),\s+(?!(?:and|or|then|select|click|enter|run|open|choose|type|press|verify|which|but|so)\b)([A-Za-z0-9_-]+)\s+(and|or)\s+([A-Za-z0-9_-]+)\b",
-        "message": "Possible series without a serial comma: '{match}'. This check is a heuristic.",
-        "fix": "In a list of three or more, add a comma before 'and' or 'or': 'A, B, and C'.",
+        "guidance": "Write 'filename' as one word.",
     },
 ]
-
-PROPER_NOUNS = {
-    "Node.js", "Python", "JavaScript", "TypeScript", "Go", "Rust", "Java", "Kotlin",
-    "Google", "Cloud", "Docker", "Kubernetes", "Git", "GitHub", "GitLab", "Linux",
-    "Windows", "Android", "Chrome", "Firebase", "PostgreSQL", "MySQL", "Redis",
-    "Terraform", "Ansible", "Storage", "Run", "Functions", "Compute", "Engine",
-}
-
-FUNCTION_WORDS = {"with", "your", "from", "for", "the", "and", "under", "into", "to", "of", "in", "on", "a", "an"}
 
 INLINE_CODE = re.compile(r"`+[^`]*`+")
 FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
@@ -159,47 +115,10 @@ def check_heading(line: str, line_num: int, ignored: Set[str]) -> List[Dict[str,
         issues.append({
             "rule_id": "GDG-061",
             "rule_name": "Heading punctuation",
-            "severity": "ERROR",
-            "line_number": line_num,
-            "matched_text": heading_text,
-            "message": "Headings read best without end punctuation.",
-            "fix": "Remove the trailing punctuation mark.",
-        })
-
-    if "GDG-060" in ignored:
-        return issues
-
-    clean = re.sub(r"`[^`]+`", "", heading_text)
-    clean = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", clean)
-    clean = re.sub(r"\[[^\]]+\]", "", clean)
-    words = [w for w in re.split(r"[\s/:]+", clean.strip()) if w]
-    if len(words) <= 1:
-        return issues
-
-    capitalized: List[str] = []
-    for word in words[1:]:
-        bare = word.strip("()\"'&,")
-        if not bare:
-            continue
-        if bare.isupper() and len(bare) <= 6:
-            continue
-        if bare in PROPER_NOUNS:
-            continue
-        if bare[0].isupper() and bare[1:].islower():
-            capitalized.append(bare)
-
-    title_case = len(capitalized) >= 2 or (
-        len(words) >= 3 and capitalized and capitalized[0].lower() in FUNCTION_WORDS
-    )
-    if title_case:
-        issues.append({
-            "rule_id": "GDG-060",
-            "rule_name": "Heading sentence case",
             "severity": "WARNING",
             "line_number": line_num,
             "matched_text": heading_text,
-            "message": f"Heading '{clean.strip()}' looks like title case. Sentence case capitalizes the first word and proper nouns.",
-            "fix": "Lowercase the other words, keeping proper nouns and acronyms capitalized.",
+            "guidance": "Use a short heading that ends with its final word. A genuine reader question can end with a question mark.",
         })
 
     return issues
@@ -216,8 +135,7 @@ def lint_file(path: Path, ignored: Set[str]) -> List[Dict[str, Any]]:
             "file": str(path),
             "line_number": 0,
             "matched_text": "",
-            "message": f"Could not read the file: {exc}",
-            "fix": "Check the path and permissions.",
+            "guidance": f"Provide a readable path. The file operation returned: {exc}",
         }]
 
     issues: List[Dict[str, Any]] = []
@@ -255,8 +173,7 @@ def lint_file(path: Path, ignored: Set[str]) -> List[Dict[str, Any]]:
                     "file": str(path),
                     "line_number": line_num,
                     "matched_text": matched,
-                    "message": rule["message"].format(match=matched),
-                    "fix": rule["fix"],
+                    "guidance": rule["guidance"],
                 })
 
     return issues
@@ -298,9 +215,8 @@ def main() -> None:
         for issue in issues:
             badge = "ERROR  " if issue["severity"] == "ERROR" else "WARNING"
             print(f"\n{badge} {issue['file']}:{issue['line_number']} [{issue['rule_id']} {issue['rule_name']}]")
-            print(f"  Text: {issue['matched_text']}")
-            print(f"  Why:  {issue['message']}")
-            print(f"  Fix:  {issue['fix']}")
+            print(f"  Match:    {issue['matched_text']}")
+            print(f"  Guidance: {issue['guidance']}")
         print(f"\n{errors} error(s), {warnings} warning(s).")
 
     if errors or (args.strict and warnings):

@@ -55,20 +55,20 @@ Vary how sentences begin. A paragraph reads naturally when some sentences open w
 
 Contractions keep the tone conversational: *it's*, *don't*, *can't*, *you'll*, *you've*, *isn't*, *aren't*, *won't*. Spell out the words when the contraction would be ambiguous or awkward, such as *it would* and *there would*.
 
-## Write timeless content
+## Write about released and approved behavior
 
-Describe the current behavior as a plain fact, so that the sentence stays true after the next release.
+Describe released behavior as a plain fact, so that the sentence stays useful after the next release. Public approval is the prerequisite for text about a future feature or product.
 
 | Situation | Timeless sentence |
 | :--- | :--- |
 | A feature that arrived in the latest release | The API supports WebSockets. |
 | A default that holds at the time of writing | Python 3.12 is the default runtime. |
-| A feature planned for a later release | For supported architectures, see [System requirements](https://example.com/docs/requirements). |
+| A capability whose availability varies | For supported architectures, see [System requirements](https://example.com/docs/requirements). |
 | A version that replaced an earlier one | Use the v2 endpoint. For v1 migration steps, see [Migrate to v2](https://example.com/docs/migrate). |
 
-Words that anchor a sentence to a moment (`currently`, `now`, `soon`, `recently`, `at this time`) can usually be removed without changing the meaning. Where the timing matters, give the version or date: "Starting with version 3.2, the client retries automatically."
+Use a version or date when timing carries meaning: "Starting with version 3.2, the client retries automatically." A plain present-tense fact fits stable behavior.
 
-## State facts instead of judgments
+## State measurable facts
 
 Describe capability with specifics that a reader can verify:
 
@@ -76,19 +76,36 @@ Describe capability with specifics that a reader can verify:
 - "Encrypts data at rest with AES-256."
 - "To compile the project, run `make build`."
 
-Specifics replace both marketing adjectives and reassurances about difficulty. A step that needs documentation deserves a plain instruction; the reader judges the difficulty.
+Specifics give readers evidence for their own decisions. Present each task as a plain instruction.
+
+## Recommend a clear path
+
+For a complex goal, recommend the path that fits the most common reader and use case. Give the complete procedure for that path and link to reference material for additional options.
+
+Use the following language to show how strongly the guidance applies:
+
+- Requirement: an imperative or *must*: "Set the region before you deploy."
+- Recommendation: *We recommend*: "We recommend workload identity for production services."
+- Optional action: *can*: "You can add a label to group related resources."
+- Expected outcome: a direct statement: "The command returns the service URL."
+- Possible outcome: *might* or *can*: "The deployment might take several minutes."
+
+## Describe components by their actions
+
+Name the component and its observable action: "A `Delimiter` object specifies where to split a string." "The client detects a connected device." This wording gives software and hardware precise technical roles.
 
 ## Keep the tone plain and professional
 
 - Give instructions directly: "Click **Save**." The word `please` belongs in requests for permission or forgiveness.
 - End sentences with periods. Emphasis comes from word choice and sentence position.
-- Choose literal wording over idioms, humor, and pop-culture references, which translate poorly and age fast.
+- Choose literal wording that travels well across cultures, translation, and time.
 - Describe software in terms of what it does: "The load balancer marks the backend as unhealthy after three failed health checks." "Cyclic dependencies cause a compilation error."
 
 ## Write for a global audience
 
-- Prefer the common word: *use* rather than *utilize*, *start* rather than *commence*, *help* rather than *facilitate*.
-- Prefer a single verb where one exists: *remove* rather than *take out*, *continue* rather than *carry on*.
+- Use common words: *use*, *start*, *help*.
+- Use a precise single verb when one carries the full meaning: *remove*, *continue*, *configure*.
+- Define an unfamiliar abbreviation or technical term at its first useful occurrence. Keep an established industry term when it is the clearest term for the audience.
 - Keep at most two nouns in a row as modifiers: "the configuration file for the storage bucket".
 - Give every pronoun an unmistakable antecedent. When *this* or *it* could point to two things, repeat the noun.
 - Keep helper words such as *that* and *then*: "Verify that the service is running."

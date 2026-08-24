@@ -6,7 +6,8 @@ This reference covers headings, lists, procedures, tables, notices, numbers, dat
 
 - Use sentence case: capitalize the first word and proper nouns. "Get started with Cloud Functions", "Manage user permissions and roles", "Advanced configuration options".
 - Start task headings with a bare infinitive: "Create an instance", "Install the CLI". Use noun phrases for conceptual sections: "Authentication lifecycle".
-- Keep headings short and free of end punctuation. A heading that needs a colon or a question mark usually wants rewording.
+- Prefix a section that applies to a subset of readers or configurations with *Optional:*: "Optional: Customize the alias".
+- Keep headings short and use simple punctuation. Most headings end without punctuation; a genuine reader question can end with a question mark.
 - Use one H1 per page, and descend one level at a time (`#`, `##`, `###`).
 - Make each heading meaningful on its own, because readers scan tables of contents and search results.
 
@@ -68,7 +69,7 @@ To create a bucket:
 ## Tables
 
 - Include a header row, and write column headers in sentence case.
-- Fill every cell; write `None` or `N/A` where a value is absent.
+- Fill every cell; write `None` or `Not applicable` where a value is absent.
 - Left-align text and right-align numbers.
 - Introduce the table with a sentence that says what it lists: "The following table describes the request parameters:".
 
@@ -87,8 +88,8 @@ Use notices for information that stands apart from the main flow, and use them r
 | Type | Use for |
 | :--- | :--- |
 | Note | Background, tips, related information |
-| Caution | Actions that risk data loss, cost, or security exposure |
-| Warning | Severe or irreversible consequences |
+| Caution | Context that helps the reader proceed carefully |
+| Warning | Irreversible actions or risks to data, money, work, or security |
 
 Keep required steps in the numbered procedure: a notice holds context, and the procedure holds actions. Keep each notice to one short paragraph.
 
@@ -96,7 +97,7 @@ Keep required steps in the numbered procedure: a notice holds context, and the p
 > [!NOTE]
 > Bucket names are visible to anyone who requests the bucket's URL.
 
-> [!CAUTION]
+> [!WARNING]
 > Deleting a bucket also deletes every object in it.
 ```
 
@@ -105,13 +106,14 @@ Keep required steps in the numbered procedure: a notice holds context, and the p
 - Spell out zero through nine in running text, and use numerals from 10 upward: "three authentication methods", "up to 25 records".
 - Use numerals with units, percentages, versions, step references, and in tables: "5 MB", "99.9%", "version 2", "step 1".
 - Spell out a number that starts a sentence, or reword so that the numeral falls later: "The system launched 12 instances."
-- Put a space between a number and its unit: `10 MB`, `500 ms`, `2.4 GHz`. Write percentages without a space: `99.9%`.
+- Put a nonbreaking space between a number and its unit: `10&nbsp;MB`, `500&nbsp;ms`, `2.4&nbsp;GHz`. Write percentages without a space: `99.9%`.
 - Express ranges with *to* or *through* in prose: "from 3 to 10 retries". Use a hyphen in tables and compact labels: `3-10`.
 
 ## Dates and times
 
-- Write dates with the month spelled out, or in ISO 8601 form: "August 25, 2026" or `2026-08-25`.
-- Include the time zone with a time: "14:30 UTC", "2:30 PM PDT".
+- Write dates with the month spelled out: "August 25, 2026". Use ISO 8601 form when a numeric-only date is required: `2026-08-25`.
+- Use the 12-hour clock for prose unless the product or interface uses a 24-hour clock.
+- Add a time zone when the event depends on one. Spell out the region and include its UTC offset: "US and Canadian Pacific Daylight Time (UTC-7)".
 
 ## Paragraphs
 
