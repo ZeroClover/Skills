@@ -40,10 +40,53 @@ Stop at the first matching rule:
 1. Detect whether the user explicitly named file paths.
 2. Apply the file selection rule.
 3. Check for `COMMIT_GUIDELINES.md`. If absent, skim recent commits **only** for scope conventions.
-4. Decide whether to confirm based on the current execution mode:
+4. Decide how to proceed based on the current execution mode:
    - **Non-interactive** (e.g. Codex `never` approval policy, or any headless/auto mode where the user cannot reply): **commit directly without printing a draft or waiting for confirmation.**
-   - **Interactive** (any mode where the user can reply): present the commit message draft and wait for confirmation before committing.
+   - **Interactive** (any mode where the user can reply): run the interactive flow below before committing.
 5. Run the commit, then print a summary: `git show --stat --oneline -1`.
+
+## Interactive flow
+
+### Asking the user — structured question tools first
+
+- **Always prefer a structured question tool** (e.g. `Ask User Question`, or an equivalent mechanism the current agent exposes) over asking in plain conversation. Never end a turn with a plain-text question and expect the user to reply with a normal prompt, unless **no question tool is available at all**.
+- Every question you ask through the tool must include at least:
+  1. **Approve / Agree** — accept the proposal.
+  2. **Reject / Disagree** — refuse the proposal.
+  3. **Other** — free-form input for the user (optional; only if the tool supports it).
+  4. Any additional options you consider useful (optional).
+- If the question tool does **not** support free-form user input and the user picks **Reject**, follow up by asking the user for direction (e.g. what to change).
+
+### Step 1 — Confirm the commit split (only when rule 3 fired)
+
+If the user did not specify a scope and you are about to commit **all** workspace changes, first judge whether those changes would be better handled as **multiple logical commits** (e.g. unrelated features, or a fix mixed with a refactor).
+
+- If yes, use the question tool to ask whether the user agrees with the proposed split, presenting the planned commits. On approval, create the commits one by one; on rejection, commit everything as a single commit (or ask for direction if the user provided feedback).
+- If the changes belong together, proceed directly to Step 2.
+
+### Step 2 — Confirm the draft message and the push action in one session
+
+In a **single question session** (one tool call), ask:
+
+1. **Commit message** — present the draft message(s) and ask whether the user accepts them, with the standard options above (Approve / Reject / Other / extras).
+2. **After committing** — ask what to do next, with at least these options:
+   1. **Push** — push to the current branch's upstream.
+   2. **Create PR and push** — push, then open a pull request.
+   3. **Create draft PR and push** — push, then open a draft pull request.
+   4. **Don't push** — stop after committing.
+   5. **Other** (optional) and any extra options you find necessary.
+
+### Step 3 — Branch handling for PR options
+
+If the user chose **Create PR and push** or **Create draft PR and push**:
+
+- Check whether HEAD is on a branch.
+  - **On a branch** → use the question tool to ask whether to push under the current branch name (offer alternatives only if you have a reason, e.g. the branch is `main`).
+  - **Not on a branch (detached HEAD)** → generate **several meaningful branch name suggestions** and let the user pick via the question tool. Branch names must:
+    - Be descriptive of the change.
+    - Use the Conventional Commits type as prefix (e.g. `feat/`, `fix/`, `refactor/`).
+    - **Never** use the agent's or model's name as a prefix.
+- Then push and create the PR (e.g. `gh pr create` / `gh pr create --draft`).
 
 ## Suggested commands
 
