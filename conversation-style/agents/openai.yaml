@@ -1,0 +1,7 @@
+interface:
+  display_name: "Conversation Style"
+  short_description: "Plain-language style guide for replies, explanations, and written notes."
+  default_prompt: "Use $conversation-style to format and refine conversational responses and written notes."
+
+policy:
+  allow_implicit_invocation: false

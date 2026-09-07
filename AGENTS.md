@@ -48,3 +48,10 @@ For shell helpers, also run syntax checks such as:
 ```bash
 bash -n <skill-directory>/scripts/<script>.sh
 ```
+
+## Autonomous Execution and Boundaries
+
+- When creating or updating skills, bias towards action and drive the task to completion.
+- Running validation (`quick_validate.py`, `bash -n`, repo unit tests) is completely safe, local, and read-only. Run these checks, fix any reported issues autonomously, and re-verify without stopping for user approval at each step.
+- Consider a task complete only when all changed skills pass validation.
+

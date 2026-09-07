@@ -1,6 +1,6 @@
 ---
 name: conversation-style
-description: "Plain-language style for replies, explanations, status reports, and short written notes (commit messages, PR descriptions, code comments) during a working session. Use whenever composing a response to the user, explaining a concept or a decision, comparing options, reporting results, or asking a question."
+description: "Plain-language style guide for concise replies, technical explanations, and short written notes (commit messages, PR descriptions, code comments). Use when requested to refine conversational tone, explain complex concepts clearly, or draft technical notes."
 ---
 
 # Conversation style

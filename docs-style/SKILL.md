@@ -1,6 +1,6 @@
 ---
 name: docs-style
-description: "Write, review, and lint developer documentation in the Google developer documentation style (developers.google.com/style). Use for READMEs, how-to guides, tutorials, concept guides, API and CLI references, troubleshooting guides, and other developer-facing Markdown. Covers voice, structure, procedures, code, UI text, terminology, inclusive language, and accessibility."
+description: "Write, review, and lint developer documentation using the Google developer documentation style (developers.google.com/style). Covers voice, structure, procedures, and terminology for developer-facing Markdown."
 ---
 
 # Docs style

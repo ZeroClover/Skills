@@ -1,6 +1,6 @@
 ---
 name: create-commit
-description: "Create Git commits for any repository by choosing files from explicit user selection, existing staged changes, or all workspace changes. Drafts messages following repository-level COMMIT_GUIDELINES.md when present; otherwise defaults to Conventional Commits, in English, with a single-line subject."
+description: "Interactively draft and execute Git commits with user confirmation. Selects files from explicit input, staged changes, or workspace diffs; follows Conventional Commits in English."
 allowed-tools: Bash(git *)
 ---
 
@@ -40,20 +40,28 @@ Stop at the first matching rule:
 1. Detect whether the user explicitly named file paths.
 2. Apply the file selection rule.
 3. Check for `COMMIT_GUIDELINES.md`. If absent, skim recent commits **only** for scope conventions.
-4. Decide how to proceed based on the current execution mode:
+4. Prepare the concrete proposal: diff statistics (`git diff --stat`) and the drafted commit message.
+5. Decide how to proceed based on the current execution mode:
    - **Non-interactive** (e.g. Codex `never` approval policy, or any headless/auto mode where the user cannot reply): **commit directly without printing a draft or waiting for confirmation.**
    - **Interactive** (any mode where the user can reply): run the interactive flow below before committing.
-5. Run the commit, then print a summary: `git show --stat --oneline -1`.
+6. Run the commit, then print a summary: `git show --stat --oneline -1`.
 
 ## Interactive flow
+
+### Present concrete reviewable results first
+
+Before invoking any question tool:
+- Print or display the concrete diff preview: files affected and summary of changes (`git diff --stat` or `git status --short`).
+- Display the complete drafted commit message (subject and body if warranted).
+- Ensure the user is approving a concrete, fully formed result.
 
 ### Asking the user — structured question tools first
 
 - **Always prefer a structured question tool** (e.g. `Ask User Question`, or an equivalent mechanism the current agent exposes) over asking in plain conversation. Never end a turn with a plain-text question and expect the user to reply with a normal prompt, unless **no question tool is available at all**.
-- Every question you ask through the tool must include at least:
+- Every question you ask through the tool must present clear actionable choices:
   1. **Approve / Agree** — accept the proposal.
   2. **Reject / Disagree** — refuse the proposal.
-  3. **Other** — free-form input for the user (optional; only if the tool supports it).
+  3. **Other** — free-form input for the user (only if the tool requires explicit addition; omit if the platform UI provides write-in input automatically).
   4. Any additional options you consider useful (optional).
 - If the question tool does **not** support free-form user input and the user picks **Reject**, follow up by asking the user for direction (e.g. what to change).
 

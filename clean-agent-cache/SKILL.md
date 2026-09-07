@@ -1,6 +1,6 @@
 ---
 name: clean-agent-cache
-description: "Reclaim disk space from AI coding agents by removing caches, logs, temp files, and (opt-in) conversation history, sessions, and archived sessions. Covers Claude Code and Codex (CLI + desktop, first-class) plus Cursor, OpenCode, ZCode, Antigravity, Conductor, Kimi Code, Grok Build, and Pi. Use when the user wants to clean, prune, or free space from agent caches/history, or audit what is safe to delete. Dry-run by default; never touches config, credentials, memory, skills, plugins, or login state."
+description: "Reclaim disk space by auditing or deleting caches, logs, and temp files from AI coding agents (Claude Code, Codex, Cursor, etc.). Safe and dry-run by default; history cleanup is opt-in."
 ---
 
 # Clean Agent Cache
