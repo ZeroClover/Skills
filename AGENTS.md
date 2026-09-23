@@ -24,7 +24,7 @@ Only create optional directories when they contain files the skill actually need
 - Run Python tools with `uv run ...`, for example:
 
 ```bash
-uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py fetch-markdown
+uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py create-commit
 ```
 
 ## Skill Maintenance
@@ -51,7 +51,6 @@ bash -n <skill-directory>/scripts/<script>.sh
 
 ## Autonomous Execution and Boundaries
 
-- When creating or updating skills, bias towards action and drive the task to completion.
 - Running validation (`quick_validate.py`, `bash -n`, repo unit tests) is completely safe, local, and read-only. Run these checks, fix any reported issues autonomously, and re-verify without stopping for user approval at each step.
 - Consider a task complete only when all changed skills pass validation.
 

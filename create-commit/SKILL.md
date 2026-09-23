@@ -24,22 +24,20 @@ Stop at the first matching rule:
 
 1. Read `COMMIT_GUIDELINES.md` at the repository root.
 2. If it exists, follow it strictly. For any aspect it does **not** constrain, fall back to the defaults below.
-3. If it does not exist, **do not imitate the repository's existing commit style wholesale.** Skim recent commits **only** to learn the repository's `scope` conventions, then apply the defaults below for everything else.
-   - Suggested probe: `git log -n 20 --pretty=format:'%s'`
-   - Extract recurring scopes (e.g. `api`, `ui`, `cli`, package names) and reuse them when relevant. Ignore the rest of the prior style.
+3. If it does not exist, apply the defaults below. Read recent subjects (`git log -n 20 --pretty=format:'%s'`) only to learn which scopes the repository uses (e.g. `api`, `ui`, `cli`, package names); the defaults govern everything else.
 
 ### Defaults (apply when `COMMIT_GUIDELINES.md` is absent or silent on a given aspect)
 
 - **Style — Conventional Commits.** Format: `<type>(<scope>)?: <subject>`. Common types: `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `chore`, `style`, `revert`. Scope is optional; include it only when it adds clarity, and prefer scopes the repo already uses.
 - **Language — English.** Subject and body are written in English regardless of the conversation language. Switch only when the user explicitly requests another language, or `COMMIT_GUIDELINES.md` mandates one.
-- **Length — not bound by the legacy 50-character myth.** Aim for ≤72 characters when natural, but this is **not** a hard cap. A longer, accurate subject beats a vague short one — write what the change actually needs, not what an ancient 80-column terminal allowed.
-- **Body — prefer subject-only (single-line) commits.** Add a body **only** when the change is large and spans multiple components, or when the *why* is non-obvious and cannot fit in the subject. Small fixes, single-file refactors, doc tweaks, and routine chores should be a single line. Never pad a body just to fill space.
+- **Length — about 72 characters.** Treat 72 as a target, not a cap: an accurate longer subject is better than a vague short one.
+- **Body — subject-only by default.** Add a body when the change spans multiple components or the *why* does not fit in the subject. Small fixes, single-file refactors, doc tweaks, and routine chores get a single line.
 
 ## Execution flow
 
 1. Detect whether the user explicitly named file paths.
 2. Apply the file selection rule.
-3. Check for `COMMIT_GUIDELINES.md`. If absent, skim recent commits **only** for scope conventions.
+3. Check for `COMMIT_GUIDELINES.md`. If absent, skim recent commits for scope conventions.
 4. Prepare the concrete proposal: diff statistics (`git diff --stat`) and the drafted commit message.
 5. Decide how to proceed based on the current execution mode:
    - **Non-interactive** (e.g. Codex `never` approval policy, or any headless/auto mode where the user cannot reply): **commit directly without printing a draft or waiting for confirmation.**
@@ -57,7 +55,7 @@ Before invoking any question tool:
 
 ### Asking the user — structured question tools first
 
-- **Always prefer a structured question tool** (e.g. `Ask User Question`, or an equivalent mechanism the current agent exposes) over asking in plain conversation. Never end a turn with a plain-text question and expect the user to reply with a normal prompt, unless **no question tool is available at all**.
+- Ask through the agent's structured question tool (e.g. `AskUserQuestion`, or the equivalent the current agent exposes) so the user answers by picking an option. Ask in plain text only when no such tool is available.
 - Every question you ask through the tool must present clear actionable choices:
   1. **Approve / Agree** — accept the proposal.
   2. **Reject / Disagree** — refuse the proposal.
