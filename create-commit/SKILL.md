@@ -1,6 +1,6 @@
 ---
 name: create-commit
-description: "Interactively draft and execute Git commits with user confirmation. Selects files from explicit input, staged changes, or workspace diffs; follows Conventional Commits in English."
+description: "Draft and execute Git commits, confirming with the user when they can reply. Selects files from explicit input, staged changes, or workspace diffs; follows Conventional Commits in English."
 allowed-tools: Bash(git *)
 ---
 
@@ -91,7 +91,7 @@ If the user chose **Create PR and push** or **Create draft PR and push**:
   - **Not on a branch (detached HEAD)** → generate **several meaningful branch name suggestions** and let the user pick via the question tool. Branch names must:
     - Be descriptive of the change.
     - Use the Conventional Commits type as prefix (e.g. `feat/`, `fix/`, `refactor/`).
-    - **Never** use the agent's or model's name as a prefix.
+    - Leave out the agent's or model's name (e.g. `codex/`, `claude/`); the prefix describes the change, not the tool that made it.
 - Then push and create the PR (e.g. `gh pr create` / `gh pr create --draft`).
 
 ## Suggested commands

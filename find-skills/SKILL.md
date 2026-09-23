@@ -7,16 +7,6 @@ description: Discover and install agent skills from the open agent skills ecosys
 
 Discover and install skills from the open agent skills ecosystem.
 
-## When to Use This Skill
-
-Use this skill when the user:
-
-- Asks to find or recommend a skill for a given task or framework (e.g. "find a skill for Next.js", "is there a skill for Playwright?")
-- Expresses interest in extending agent capabilities with external skills
-- Wants to search for or install community tools and workflows via `npx skills`
-
-Do not use this skill for general programming questions that can be answered directly.
-
 ## Skills CLI Commands
 
 The Skills CLI (`npx skills`) is the package manager for the open agent skills ecosystem:

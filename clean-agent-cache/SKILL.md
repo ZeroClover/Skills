@@ -96,7 +96,7 @@ uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_vali
   pruned in place with `DELETE` + `VACUUM` (not deleted), so the schema and any
   rows you keep via `--older-than` survive. VACUUM needs exclusive access, so
   quit Codex first. The Claude desktop VM bundle is intentionally **not** a
-  target — deleting it just forces a wasteful 12 GB re-download.
+  target — deleting it just forces a large re-download.
 - **Conductor**: never delete `~/conductor/workspaces` — worktrees may hold
   uncommitted code. Use Conductor's in-app Archive instead.
 - **Antigravity**: `~/.gemini/antigravity*/conversations` and `brain` are chat
