@@ -36,7 +36,7 @@ Krug, Chapters 1–5 and 9:
 
 ## Quick review
 
-Check the artifact the user will actually see. Mark each item pass, fail, or not applicable. For every fail, open the reference in the index and change the design. Stop when each item passes, or when a remaining miss names the constraint and the tradeoff.
+Check the artifact the user will actually see. Mark each item pass, fail, or not applicable. For every fail, open the reference in the index and change the design.
 
 **Layout (Williams)**
 
@@ -45,7 +45,7 @@ Check the artifact the user will actually see. Mark each item pass, fail, or not
 - Every element lines up with another element. One alignment dominates.
 - A repeated type style, color, spacing, or mark ties the sections together.
 - Differences in size, weight, or color are obvious. The loudest element is the one that should be first.
-- Body text is readable. Text and background differ clearly in lightness.
+- Body text is readable. Text and background differ clearly in lightness. A constraint can change the palette. It does not drop the lightness difference.
 
 **Use (Krug)**
 
@@ -57,6 +57,9 @@ Check the artifact the user will actually see. Mark each item pass, fail, or not
 - Removing half the words would leave the task intact.
 - On a deep page, the viewer can find the site identifier, the page name, the main sections, the local options, the current location, and search.
 - An entry screen answers what this is, what a person can do here, what is here, and why it is worth staying.
+- The primary task works from the keyboard, with field labels in place. Alt text matches the image's purpose: the action for a functional image, a longer equivalent for a chart or diagram, and an empty alt for decoration or a repeat of nearby text. Open [references/goodwill-and-access.md](references/goodwill-and-access.md) before writing those alternatives.
+
+Stop when each item passes, or when a remaining miss names a narrow constraint and what is still provided. A constraint does not drop keyboard operation, labels, text contrast, or alt text.
 
 If the remaining disagreement is about personal taste, run the small task test in [references/usability-testing.md](references/usability-testing.md). Another visual variant will not settle it.
 

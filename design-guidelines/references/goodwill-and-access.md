@@ -30,13 +30,15 @@ Things that refill it:
 
 ## Access
 
-Chapter 12: a product is not usable if people with disabilities cannot use it, unless you have made an explicit decision to exclude them. Krug's reason for doing the work is that it is the right thing and it can change what someone is able to do. Legal requirements arrive as well. Do not wait for the fear of extra work, or the fear that access and a good design are opposed, to settle the question. Many of the important fixes do not force that tradeoff.
+Chapter 12: a product is not usable if people with disabilities cannot use it. Krug's reason for doing the work is that it is the right thing and it can change what someone is able to do. Legal requirements arrive as well. Do not wait for the fear of extra work, or the fear that access and a good design are opposed, to settle the question. Many of the important fixes do not force that tradeoff.
+
+A technical constraint can narrow the method. It does not remove the checks. If a control cannot use the platform's usual keyboard behavior, provide another keyboard path and name what that control cannot do. Still label every field, still keep text contrast, and still give each image the alternative its purpose requires.
 
 The highest-leverage step is to fix the usability problems that confuse everyone. A confusing error is worse when you cannot see the page. Guidelines applied to an unclear interface still leave it unusable.
 
 Then do the high-impact implementation work. Krug's list, which he tells you to learn properly from a current accessibility reference such as WebAIM rather than from memory:
 
-- Give every image alternative text. Use an empty alt when the image should be ignored. Describe the rest.
+- Give every image alternative text that matches its purpose. A functional image names the action: an icon-only search button is "Search," not "magnifying glass." A complex image, such as a chart or diagram, needs a longer equivalent of the information it shows. A decorative image, or one that repeats nearby text, gets an empty alt so it is not announced again.
 - Use real headings in order, and style them with CSS. Headings are navigation for someone listening.
 - Associate each form field with its label.
 - Provide a way to skip repeated navigation.
@@ -50,18 +52,19 @@ Chapter 10's durable point on small screens: the same principles apply, people r
 
 ## Examples
 
-**Do.** A pricing page that shows the monthly price, the annual price, and what is not included, before the signup button. The signup form asks for an email and a password. The error "That email is already in use" offers a sign-in link. The price is text, not an image, and the button is reachable by keyboard.
+**Do.** A pricing page that shows the monthly price, the annual price, and what is not included, before the signup button. The signup form asks for an email and a password. The error "That email is already in use" offers a sign-in link. The price is text, not an image, and the button is reachable by keyboard. An icon-only search button is named "Search." A chart of the same prices has a text equivalent of the trend. A decorative rule, or a logo that repeats the product name beside it, has an empty alt.
 
-**Avoid.** A wireless-portal flow that takes three promotional screens to reveal the price. The card field rejects spaces. Support contact is absent. The heading structure is a row of styled divs, so a screen-reader user cannot jump to "Price."
+**Avoid.** A wireless-portal flow that takes three promotional screens to reveal the price. The card field rejects spaces. Support contact is absent. The heading structure is a row of styled divs, so a screen-reader user cannot jump to "Price." An icon-only search control is announced as "magnifying glass," and a chart has no text equivalent.
 
 ## Review questions
 
 - What are the three things people come here to do, and can they start each one immediately?
 - Which facts would you rather hide, and are they visible before the commitment?
 - Are you asking only for what this step needs, in whatever format the visitor naturally types?
-- Can someone complete the primary task by keyboard, with headings, labels, and image descriptions in place?
+- Can someone complete the primary task by keyboard, with headings and labels in place?
+- Does each image's alt text match its purpose: the action, a longer equivalent, or an empty alt?
 - Do links and headings start with the words a person would scan for?
-- If a constraint forced a tradeoff, is the primary task still the easy path?
+- If a constraint narrows the method, is the primary task still the easy path, with keyboard operation, labels, text contrast, and purpose-based alt text still in place?
 
 ## Go deeper
 
