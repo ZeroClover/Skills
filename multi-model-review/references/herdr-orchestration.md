@@ -1,12 +1,28 @@
 # Herdr orchestration for a review batch
 
-Read this when a script reports a Herdr error, when you need to inspect a reviewer directly, or when you run Herdr commands yourself. `scripts/review_run.py` already performs the routine steps described here.
+Read this when `review_run.py` reports a Herdr error, when you need to inspect a reviewer directly, when you resume an interrupted run, or when you run Herdr commands yourself. `scripts/review_run.py` already performs the routine steps described here.
+
+## Invariants
+
+The script enforces these; keep them too whenever you act by hand:
+
+- The batch runs in a fresh Herdr session named after the run ID and owned by this run; it reuses, inspects, and deletes only that session.
+- Each reviewer gets its own tab and a fresh conversation, with `MMR_ROLE=reviewer` and `MMR_RUN_ID` in its environment.
+- The `argv` Herdr launched is recorded per reviewer, corroborated by the pane's status line and process command line where the harness exposes them. That is the evidence for harness, model, and reasoning level; a model's self-description is not.
+- A round counts a reviewer as done only when its report exists with header fields that exactly match this run, round, reviewer, stage, and version, and carry a single verdict token.
+- The manifest records the run's intent before the session server starts and records every resource as soon as it exists, so an interrupted run can be inspected with `status` and finished with `cleanup`.
+- Every session-control command (`start`, `round`, `wait`, `cleanup`) first checks that the live session is the one this run created: same name, same session directory, and, while the session runs, the run's workspace still present (a failed workspace query is reported as such, not as a mismatch). A started reviewer keeps its configuration for the whole run; `start` refuses to change or drop one.
+- Cleanup closes the reviewer panes it opened, then stops and deletes only that verified session.
+
+## Run directory
+
+`manifest.json`, briefs, reports, and the issue record live in the run directory, by default `<system temp dir>/multi-model-review/<repo>-<hash>/<run-id>/`. That keeps review material out of the repository's `git status`, lets later sessions find it (`review_run.py list --repo <root>`), and lets the OS reclaim it (on macOS the per-user temp dir is purged after a few days without access; elsewhere the system temp policy applies). Pass `--run-dir` to `init` when a run must be kept longer; the final report to the user carries the conclusions either way.
 
 ## Why operating Herdr from outside a pane is correct here
 
 Herdr's own skill tells an agent to stop unless `HERDR_ENV=1`, and not to "inspect or control the focused Herdr session from outside Herdr". That rule protects the user's interactive default session, whose panes belong to the user and to other tasks. This workflow never touches that session:
 
-- It creates a brand-new named session whose name is the run ID (`herdr --session <run-id> server`), so nothing in it existed before this batch.
+- It creates a brand-new session named after the run ID (`herdr --session <run-id> server`), so nothing in it existed before this batch.
 - Every command targets that session explicitly with `--session <run-id>`, which the CLI documents as "use or create a named persistent session".
 - The user's instruction to run this review is the authorization to create and later delete that session.
 
@@ -34,11 +50,11 @@ Facts verified on herdr 0.9.5:
 - Arguments after `--` on `agent start` go to the binary that `--kind` names; repeating the binary name makes the harness treat it as a prompt or reject it.
 - `agent start` returns the `argv` it launched. That array is the configuration evidence for the reviewer; a model's self-description is not.
 - One tab per reviewer keeps panes wide enough to read; four splits in one tab truncate status lines.
-- `herdr session stop <name>` terminates every pane process in that session (verified by PID). `herdr session delete <name>` refuses while the session runs.
+- `herdr session stop <name>` terminates every pane process in that session (verified by PID). `herdr session delete <name>` refuses while the session is running.
 
 ## Startup dialogs
 
-A harness started in a directory it has not seen before shows a trust dialog. Seen on this machine: Antigravity "Do you trust the contents of this project?" (cursor on Yes), Codex "Trust this folder?" (cursor on "Trust and continue"), Claude Code "Yes, I trust this folder" (cursor on "No, exit" by default, so a bare Enter makes it quit). Herdr reports `agent_not_ready` with state `blocked`. The reviewed worktree is exactly what the reviewer is meant to read, so the script answers that dialog, and only that dialog (matched on its wording): it reads the screen, finds the cursor inside the option block next to the affirmative line, moves it there, confirms, waits for the harness to settle, and records `trust_prompt_answered: true` with the keys it sent and the state it settled in. If it cannot locate the options it presses nothing. Codex shows a splash screen after trusting that Herdr may report as `unknown`; the script accepts that state once the dialog is gone, and the first prompt of the round is the real readiness test. Any other startup dialog is left for you to inspect; the manifest keeps the screen text under `screen_at_failure`.
+A harness started in a directory it has not seen before shows a trust dialog, which Herdr reports as `agent_not_ready` with state `blocked`. Seen on this machine: Antigravity "Do you trust the contents of this project?" (cursor on Yes), Codex "Trust this folder?" (cursor on "Trust and continue"), and Claude Code "Yes, I trust this folder" (cursor on "No, exit" by default, so a bare Enter makes it quit). Because the reviewed worktree is exactly what the reviewer is meant to read, the script answers only that dialog (matched on its wording): it reads the screen, locates the cursor inside the option block next to the affirmative line, moves it there, confirms, waits for the harness to settle, and records `trust_prompt_answered: true` with the keys sent and the settled state. If it cannot locate the options, it presses nothing. After trusting, Codex shows a splash screen that Herdr may report as `unknown`; the script accepts that state once the dialog is gone, leaving the round's first prompt as the real readiness test. Any other startup dialog is left for you to inspect, with the screen text recorded under `screen_at_failure`.
 
 Reviewer panes inherit `HERDR_ENV=1`, so a reviewer could technically issue herdr commands against this session. The brief limits reviewers to its authorized operations, which never include session-changing herdr commands; the script does not enforce that limit. Keep it in mind when reading a report that claims to have changed session state.
 
@@ -53,8 +69,8 @@ herdr --session "$RUN" pane process-info --pane <pane-id>
 
 Lifecycle states: `working`, `idle`, `done`, `blocked`, `unknown`. A round result of `blocked` means the reviewer settled on a dialog instead of writing its report; inspect the pane before anything else.
 
-- `idle` or `done` means the agent is ready for input, not that the task is finished. Antigravity can be idle while background work continues. Completion of a round is the report file at the agreed path with valid header fields; the script checks exactly that.
-- `blocked` means Herdr recognized an approval or question dialog. Read the pane, decide what the dialog is, and answer through `agent send-keys` only when the answer is clearly within the authorized operations of the brief. If it asks for something outside them, record it and treat that reviewer's round as incomplete.
+- `idle` or `done` means the agent is ready for input, not that the task is finished (Antigravity can be idle while background work continues). A round is complete only when the report file exists at the agreed path with valid header fields; the script checks exactly that.
+- `blocked` means Herdr recognized an approval or question dialog. Read the pane to identify the dialog, and answer through `agent send-keys` only when the answer is clearly within the brief's authorized operations. If it asks for something outside them, record it and treat that reviewer's round as incomplete.
 - `unknown` means Herdr sees a process but cannot classify it. Read the pane before acting.
 
 ## Prompt and wait semantics
@@ -66,9 +82,9 @@ Lifecycle states: `working`, `idle`, `done`, `blocked`, `unknown`. A round resul
 - `timeout`: the caller timeout expired while the agent was still working. The prompt was delivered. Continue with `review_run.py wait`; do not resubmit.
 - `cli_timeout` (script-level): the herdr CLI itself did not return. Check `herdr status` and `agent get` before anything else.
 
-`wait` without `--reprompt` returns at once for an agent that is already idle, which is what you want after a timeout (the report may already exist) and what tells you, after `stalled` or `blocked`, that nothing is running. Inspect the pane; if the task never started, `wait --round N --reviewers <name> --reprompt` sends the same prompt again (the text is generated deterministically from the manifest). The script refuses to prompt an agent that is still `working` (`busy_not_sent`): one request per reviewer at a time.
+`wait` without `--reprompt` returns immediately for an agent that is already idle, useful after a timeout (the report may already exist) and after `stalled` or `blocked` (to confirm nothing is running). Inspect the pane; if the task never started, `wait --round N --reviewers <name> --reprompt` sends the same prompt again (generated deterministically from the manifest). The script refuses to prompt an agent that is still `working` (`busy_not_sent`): one request per reviewer at a time.
 
-Keep the prompt text short and point at the brief file; long briefs belong on disk, not in terminal input. Every prompt attempt is appended to the manifest under `rounds[].prompts[<name>]` at the moment it is made (text, `attempted_at`, `delivery: unknown`) and resolved when Herdr answers: `written` (Herdr reported the submission, or a later `timeout` or `stalled`, both of which happen after the text was written), `not_sent` (Herdr refused because the agent was blocked), or `unknown` (the CLI itself failed or timed out, so delivery cannot be confirmed). Earlier attempts keep their record when a reprompt is added. If the orchestrating process dies while a wait is in progress, the attempt stays `unknown`: Herdr never reported back, so the pane is the only evidence; read it before deciding whether to resend. `wait --reprompt` skips a reviewer whose valid report already exists, unless `--message` is given, because a correction is meant for a reviewer that already wrote something.
+Keep the prompt text short and point at the brief file; long briefs belong on disk, not in terminal input. Every prompt attempt is appended to the manifest under `rounds[].prompts[<name>]` when sent (`text`, `attempted_at`, `delivery: unknown`) and resolved when Herdr answers: `written` (Herdr reported the submission, or a later `timeout` or `stalled`, both of which happen after the text was written), `not_sent` (Herdr refused because the agent was blocked), or `unknown` (the CLI itself failed or timed out, so delivery cannot be confirmed). Earlier attempts keep their record when a reprompt is added. If the orchestrating process dies during a wait, the attempt stays `unknown`: Herdr never reported back, so the pane is the only evidence; read it before deciding whether to resend. `wait --reprompt` skips a reviewer whose valid report already exists, unless `--message` is given, because a correction targets a reviewer that already wrote something.
 
 ## Result vocabulary
 
@@ -85,12 +101,12 @@ Keep the prompt text short and point at the brief file; long briefs belong on di
 | `busy_not_sent` | agent still working on a previous request; nothing sent | `wait` without `--reprompt` |
 | `cli_timeout` / `error` | the herdr CLI itself failed; `detail` has the message | check `herdr status`, `agent get`, then `wait` |
 
-Each prompt attempt under `rounds[].prompts[<name>][]` records `text`, `attempted_at`, `delivery` (`written` / `not_sent` / `unknown`), and `result`, the raw outcome of that attempt's wait before the report check (`settled`, `timeout`, `stalled`, `blocked`, ...). A plain `wait` sends nothing, so its result carries `delivery: null`; delivery evidence always lives on the attempt. The interpreted outcome is the result status above.
+Each prompt attempt under `rounds[].prompts[<name>][]` records `text`, `attempted_at`, `delivery` (`written` / `not_sent` / `unknown`), and `result` (the raw wait outcome before the report check: `settled`, `timeout`, `stalled`, `blocked`, ...); the interpreted outcome is the result status above. A plain `wait` sends nothing, so its result carries `delivery: null`; delivery evidence always lives on the attempt.
 
 ## Two more continuations
 
-- `report_invalid`: the reviewer wrote a report whose header does not match (wrong version string, wrong round, a verdict that is not one token). Do not reprompt the whole review; send a short correction in its existing conversation with `wait --round N --reviewers <name> --reprompt --message "Your report header ... please fix line X"`, which records the message as a prompt attempt like any other and waits for the result. `--message` requires `--reviewers`, so a correction never reaches reviewers it was not written for.
-- A reviewer's harness exited after it had started (its pane shows a shell prompt). `start` asks Herdr; only the answer `agent_not_found` counts as gone, in which case it records the reviewer as `gone`, closes the pane, and starts it again in a fresh tab (its conversation history is lost, so the next round's brief should say so). Any other failure of that query (`cli_timeout`, a server error) proves nothing about the reviewer: `start` reports `liveness_unknown` and leaves the pane alone for you to inspect.
+- `report_invalid`: the reviewer wrote a report whose header does not match (wrong version string, wrong round, or a verdict that is not one token). Do not reprompt the whole review; send a short correction in its existing conversation with `wait --round N --reviewers <name> --reprompt --message "Your report header ... please fix line X"`, which records the message as a prompt attempt like any other and waits for the result. `--message` requires `--reviewers`, so a correction never reaches reviewers it was not written for.
+- A reviewer's harness exited after it had started (its pane shows a shell prompt): `start` queries Herdr, and only `agent_not_found` counts as gone. In that case `start` records the reviewer as `gone`, closes the pane, and starts it again in a fresh tab (its conversation history is lost, so note that in the next round's brief). Any other query failure (`cli_timeout` or a server error) proves nothing about the reviewer: `start` reports `liveness_unknown` and leaves the pane alone for you to inspect.
 
 `status` is read-only and safe to run while a round is waiting; a workspace-label warning it finds is printed, and the next control command persists it.
 
@@ -109,6 +125,6 @@ The manifest is written before the session server starts and after every resourc
 
 ## Cleanup
 
-`review_run.py cleanup --run-dir <dir>` acts only when the manifest's session name equals the run ID and the live `session_dir` matches; while the session is running it also requires the run's workspace to be present (identified by its ID; a renamed label is recorded as a warning, not a refusal). A stopped session cannot be queried, so name and session directory alone identify it then. It then closes each reviewer pane it opened, stops the session (which ends any remaining pane process), and deletes it. It never touches other sessions, worktrees, or branches. The run directory with manifest, briefs, and reports stays on disk until the OS reclaims the temp location, or indefinitely under a user-chosen `--run-dir`.
+`review_run.py cleanup --run-dir <dir>` acts only when the manifest's session name equals the run ID and the live `session_dir` matches. While the session is running, it also requires the run's workspace to be present (identified by ID; a renamed label is recorded as a warning, not a refusal). Because a stopped session cannot be queried, name and session directory alone identify a stopped session. Once verified, `cleanup` closes each reviewer pane it opened, stops the session (ending any remaining pane process), and deletes it. It never touches other sessions, worktrees, or branches. The run directory with manifest, briefs, and reports stays on disk until the OS reclaims the temp location, or indefinitely under a user-chosen `--run-dir`.
 
 Each cleanup step is appended to the manifest as it happens, so a failure midway leaves a record of what was done and what remains. Report the remaining resource by name instead of retrying blindly. Harness session files (pi, Antigravity, Codex, Claude Code) are written by the harnesses themselves during the conversation and survive the pane closing; the script sends no harness-specific exit command.

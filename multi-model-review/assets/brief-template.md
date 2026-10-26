@@ -62,11 +62,11 @@ A later request replaces an earlier one only where the two conflict or where it 
 
 ## Stage criteria
 
-{{Paste the relevant stage criteria from {{skill_dir}}/references/stage-criteria.md: proposal review or implementation review.}}
+{{Paste the "Criteria for the brief" section of {{skill_dir}}/references/stage-proposal.md or stage-implementation.md; for stage other, the user's stated completion criteria.}}
 
 ## Issue standard
 
-Report an issue when you can state: the requirement or constraint, the location or condition, the expected-versus-actual difference and its impact, and evidence (requirement text, spec, code path, interface fact, counterexample, or experiment). Classify each as blocking, non-blocking, or to-confirm. Style preferences, hypothetical risks without a concrete precondition, unmeasured performance guesses, and generalization or refactoring beyond the requirements are non-blocking at most. Pre-existing problems belong in the report only when this change triggers, amplifies, or makes them relevant to acceptance.
+Report an issue when you can state: the requirement or constraint, the location or condition, the expected-versus-actual difference and its impact, and evidence in its most direct form (a quoted requirement or spec line, a `file:line`, a command with its actual output, or a minimal counterexample). Classify each as blocking, non-blocking, or to-confirm. Style preferences, hypothetical risks without a concrete precondition, unmeasured performance guesses, and generalization or refactoring beyond the requirements are non-blocking at most. Pre-existing problems belong in the report only when this change triggers, amplifies, or makes them relevant to acceptance.
 
 ## Additional focus per reviewer
 

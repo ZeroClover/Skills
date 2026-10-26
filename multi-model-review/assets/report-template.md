@@ -7,28 +7,27 @@
 - Version: {{version_stamp}}
 - Verdict: {{PASS | CHANGES_REQUIRED | INCOMPLETE}}
 
-Keep the six header lines above exactly in this form; the orchestrator parses them and rejects a report whose Run ID, Round, Reviewer, Stage, or Version differs from the round, or whose Verdict is not exactly one token (PASS, CHANGES_REQUIRED, INCOMPLETE). Everything below is free-form, written in English; quote user requirements in their original language where the wording matters.
+Keep the six header lines above exactly in this form. The orchestrator parses them and accepts the report when Run ID, Round, Reviewer, Stage, and Version match the round and Verdict is exactly one token: PASS, CHANGES_REQUIRED, or INCOMPLETE. Write the rest in English, quoting user requirements in their original language where the wording matters. Write each item as one direct claim followed by its evidence, so the orchestrator can check it straight from the report.
 
 ## Scope and verification
 
-- Requirement coverage check: did the effective-requirements list in the brief faithfully cover the original user requests? Note any omission, drift, or unmarked interpretation.
-- What you inspected (files, specs, commands, interfaces) and at which version.
-- Verification you ran, with commands and actual results.
-- What you could not verify, and why. An unverified area is reported as unverified, never as passing.
+- Requirement coverage: whether the brief's effective-requirements list faithfully covers the original user requests; name each omission, drift, or unmarked interpretation.
+- Inspected: files, specs, commands, and interfaces, with the version.
+- Verification run: each command with its actual result.
+- Unverified: each area you could not check, with the reason, so it is counted as unverified.
 
 ## Blocking issues
 
-Issues that prevent acceptance of the current stage. Give each a stable ID (`{{reviewer_name}}-B1`, `-B2`, ...).
+Issues that prevent acceptance of the current stage. Give each a stable ID (`{{reviewer_name}}-B1`, `-B2`, ...) and state:
 
-For every issue, in this stage of the workflow:
-- Requirement or constraint it violates (quote or reference the source).
+- Requirement or constraint it violates, quoted or referenced to its source.
 - Location and the condition under which it occurs.
-- Expected versus actual behavior and the impact.
-- Evidence: requirement text, spec, code path, interface fact, counterexample, or experiment result.
+- Expected versus actual behavior, and the impact.
+- Evidence in its most direct form: a quoted requirement or spec line, a `file:line`, a command with its actual output, or a minimal counterexample.
 
 ## Non-blocking findings
 
-Improvements, risks, and inconsistencies that do not block acceptance (`{{reviewer_name}}-N1`, ...). Same evidence standard.
+Improvements, risks, and inconsistencies that do not block acceptance (`{{reviewer_name}}-N1`, ...), with the same fields.
 
 ## Items to confirm
 
@@ -36,4 +35,4 @@ Important points you could not settle with available evidence (`{{reviewer_name}
 
 ## Conclusion
 
-One or two sentences supporting the verdict. PASS means no blocking issues at the inspected version. CHANGES_REQUIRED means at least one blocking issue. INCOMPLETE means required verification could not be performed.
+The verdict and the issue IDs it rests on. PASS means no blocking issues at the inspected version. CHANGES_REQUIRED means at least one blocking issue. INCOMPLETE means required verification could not be performed.
