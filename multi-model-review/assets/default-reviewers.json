@@ -1,0 +1,31 @@
+[
+  {
+    "name": "astra",
+    "harness": "pi",
+    "model": "zero-aicoding-codex/gpt-6-astra",
+    "reasoning": "high",
+    "focus": "requirement omissions and acceptance evidence"
+  },
+  {
+    "name": "argon",
+    "harness": "agy",
+    "model": "gemini-4-argon-high",
+    "reasoning": "high",
+    "extra_args": ["--dangerously-skip-permissions"],
+    "focus": "boundaries and cross-module impact"
+  },
+  {
+    "name": "fable",
+    "harness": "pi",
+    "model": "zero-aicoding-claude/claude-fable-5-1",
+    "reasoning": "high",
+    "focus": "design consistency and scope control"
+  },
+  {
+    "name": "deepseek",
+    "harness": "pi",
+    "model": "ollama-cloud/deepseek-v4.1-flash:1017",
+    "reasoning": "max",
+    "focus": "verification evidence and failure paths"
+  }
+]

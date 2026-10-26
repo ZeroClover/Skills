@@ -1,0 +1,4 @@
+interface:
+  display_name: "Multi-Model Review"
+  short_description: "Multi-model review of OpenSpec proposals and implementations."
+  default_prompt: "Use $multi-model-review to run the multi-model review batch for the work just completed."
