@@ -51,7 +51,7 @@ herdr --session "$RUN" agent read <name> --source recent-unwrapped --lines 120
 herdr --session "$RUN" pane process-info --pane <pane-id>
 ```
 
-Lifecycle states: `working`, `idle`, `done`, `blocked`, `unknown`.
+Lifecycle states: `working`, `idle`, `done`, `blocked`, `unknown`. A round result of `blocked` means the reviewer settled on a dialog instead of writing its report; inspect the pane before anything else.
 
 - `idle` or `done` means the agent is ready for input, not that the task is finished. Antigravity can be idle while background work continues. Completion of a round is the report file at the agreed path with valid header fields; the script checks exactly that.
 - `blocked` means Herdr recognized an approval or question dialog. Read the pane, decide what the dialog is, and answer through `agent send-keys` only when the answer is clearly within the authorized operations of the brief. If it asks for something outside them, record it and treat that reviewer's round as incomplete.
@@ -92,6 +92,6 @@ The manifest is written before the session server starts and after every resourc
 
 ## Cleanup
 
-`review_run.py cleanup --run-dir <dir>` acts only when the manifest's session name equals the run ID, the live `session_dir` matches, and the live session still contains this run's workspace (identified by its ID; a renamed label is recorded as a warning, not a refusal). It then closes each reviewer pane it opened, stops the session (which ends any remaining pane process), and deletes it. It never touches other sessions, worktrees, or branches. The run directory with manifest, briefs, and reports stays on disk until the OS reclaims the temp location, or indefinitely under a user-chosen `--run-dir`.
+`review_run.py cleanup --run-dir <dir>` acts only when the manifest's session name equals the run ID and the live `session_dir` matches; while the session is running it also requires the run's workspace to be present (identified by its ID; a renamed label is recorded as a warning, not a refusal). A stopped session cannot be queried, so name and session directory alone identify it then. It then closes each reviewer pane it opened, stops the session (which ends any remaining pane process), and deletes it. It never touches other sessions, worktrees, or branches. The run directory with manifest, briefs, and reports stays on disk until the OS reclaims the temp location, or indefinitely under a user-chosen `--run-dir`.
 
 Each cleanup step is appended to the manifest as it happens, so a failure midway leaves a record of what was done and what remains. Report the remaining resource by name instead of retrying blindly. Harness session files (pi, Antigravity, Codex, Claude Code) are written by the harnesses themselves during the conversation and survive the pane closing; the script sends no harness-specific exit command.

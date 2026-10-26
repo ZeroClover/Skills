@@ -162,8 +162,10 @@ def run_root(repo):
 
     ``<system temp dir>/multi-model-review/<repo-name>-<hash of path>``: never
     part of the repository's git status, readable by later sessions (``list``
-    finds it), and reclaimed by the operating system after a few days without
-    access instead of accumulating forever. Pass ``--run-dir`` to keep a run.
+    finds it), and reclaimed by the operating system instead of accumulating
+    forever (macOS purges the per-user temp dir after a few days without
+    access; elsewhere the system's temp policy applies). Pass ``--run-dir`` to
+    keep a run.
     """
     base = tempfile.gettempdir()
     real = os.path.realpath(repo)
@@ -778,6 +780,8 @@ def wait_reviewers(m, run_dir, rnd, names, timeout_ms, send, message=None):
             res["status"] = "report_ready"
         elif check["status"] == "invalid":
             res["status"] = "report_invalid"
+        elif res["status"] == "settled" and res.get("agent_status") == "blocked":
+            res["status"] = "blocked"  # Herdr counts a dialog as settled; the orchestrator must inspect it
         elif res["status"] == "settled":
             res["status"] = "settled_no_report"
         res.update({"report": rp, "report_check": check, "finished_at": now()})
@@ -818,6 +822,8 @@ def cmd_round(a):
     missing = [n for n in names if n not in started]
     if missing:
         raise Fail("reviewers not started in this run: %s" % ", ".join(missing))
+    if not names:
+        raise Fail("no started reviewer to prompt; run `start` first")
     os.makedirs(os.path.join(a.run_dir, "round-%d" % rnd), exist_ok=True)
     version = round_version(m, a.run_dir)
     m["rounds"].append({"round": rnd, "brief": brief, "brief_sha256": sha256_file(brief), "version": version,
@@ -842,6 +848,9 @@ def cmd_wait(a):
     rr = get_round(m, rnd)
     if a.reviewers:
         names = a.reviewers.split(",")
+        unknown = [n for n in names if n not in rr["reviewers"]]
+        if unknown:
+            raise Fail("not reviewers of round %d: %s (round has: %s)" % (rnd, ", ".join(unknown), ", ".join(rr["reviewers"])))
     else:
         names = [n for n in rr["reviewers"] if rr["results"].get(n, {}).get("status") != "report_ready"]
     if not names:

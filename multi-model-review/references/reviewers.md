@@ -54,7 +54,7 @@ Evidence of what a reviewer runs, strongest first:
 3. The process command line (`process_cmdline`), only where the harness keeps it: Antigravity does, pi rewrites it to a bare `pi`.
 4. Never the model's own statement about what it is.
 
-`start` also records `preflight`: `listed` when `pi --offline --list-models` (pi's cached catalog, which includes online providers once they have been fetched) or `agy models` shows the exact model, `not_listed` when it does not, `not_checked` for other harnesses. `not_listed` usually means the provider catalog was never cached or failed to load; the agent may still fail at its first prompt. The first round's result is the real availability check.
+`start` also records `preflight`: `listed` when `pi --offline --list-models` (pi's cached catalog, which includes online providers once they have been fetched) or `agy models` shows the exact model, `not_listed` when it does not, `not_checked` for other harnesses, `check_failed: <reason>` when the catalog command itself failed. `not_listed` usually means the provider catalog was never cached or failed to load; the agent may still fail at its first prompt. The first round's result is the real availability check.
 
 ## When a reviewer is unavailable
 
