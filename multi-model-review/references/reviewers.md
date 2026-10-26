@@ -31,7 +31,7 @@ Pass `--reviewers <file>` to `review_run.py start` with a JSON list:
 ```
 
 - `name`: unique within the run, matching `[a-z][a-z0-9_-]{0,31}` (Herdr's agent-name rule).
-- `harness`: a Herdr agent kind (`herdr agent` prints the list). Templates exist for `pi`, `agy`, `codex`, `claude`; any other kind needs explicit `args`.
+- `harness`: a Herdr agent kind (`herdr agent start --help` lists the possible values of `--kind`). Templates exist for `pi`, `agy`, `codex`, `claude`; any other kind needs explicit `args`.
 - `model`, `reasoning`: always required, also with explicit `args`, because they are what the manifest and the report header record.
 - `cwd`: optional working directory for this reviewer's tab, for a reviewer whose verification writes files. Default: the run's worktree. A temporary worktree you create for this is a resource of the batch: remove it after `cleanup`, or name it as remaining. A temporary worktree must contain the same content as the reviewed version: with uncommitted changes, `git worktree add` alone gives a clean checkout, so apply the diff and copy untracked files, or commit first. `start` records `cwd_version` and `cwd_matches_worktree_version` for such a reviewer (the same exclusions apply, mapped into the temporary worktree); a `false` there means its report describes different content than the round's stamp.
 - `focus`: optional extra emphasis for the shared brief's reviewer-to-focus table. It adds to the full review and never narrows it.

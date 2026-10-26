@@ -1,6 +1,6 @@
 ---
 name: multi-model-review
-description: Orchestrate an independent multi-model review batch through Herdr. Never for an agent started as a reviewer (MMR_ROLE is set). Use after you complete an OpenSpec change proposal, after all tasks of an OpenSpec change are implemented and your verification is recorded, or when the user explicitly asks for a multi-model review of specific work. Not for partial implementation sessions or ordinary tasks that merely touch code or specs.
+description: Orchestrate an independent multi-model review batch through Herdr. Never for an agent started as a reviewer (MMR_ROLE is set). Use after you complete an OpenSpec change proposal, after an OpenSpec change is implemented (every task done, or the user declared the stage complete) and your verification is recorded, or when the user explicitly asks for a multi-model review of specific work. Not for partial implementation sessions or ordinary tasks that merely touch code or specs.
 ---
 
 # Multi-model review
@@ -35,7 +35,7 @@ One run ID covers the whole batch: first round, discussion, fixes, and re-review
 
 ## Prepare the shared materials
 
-All reviewers receive one shared brief per round. Start from `assets/brief-template.md`, keep it in the run directory (`round-N/brief.md`), and fill it from existing documents rather than writing a parallel set of requirement notes. The brief carries:
+All reviewers receive one shared brief per round. Start from `assets/brief-template.md`, keep it in the run directory (`round-N/brief.md`), and fill it from existing documents rather than writing a parallel set of requirement notes. When a later round's brief is derived from an earlier one, re-check every run-scoped value against the current manifest before sending: run ID, run directory, round, version header (HEAD, dirty state), report and scratch paths, authorized operations. A stale path sends reviewers' material into another run. The brief carries:
 
 - The user's original requests, verbatim and in order, inside the tagged block. Your summary never replaces them; the reviewers' first job is to check your effective-requirements list against the original text.
 - The effective-requirements table: source, superseded-by, and the spec or acceptance method for each. A later request replaces an earlier one only where the two conflict or where it says so; compatible earlier requirements stay in force. Anything you could not settle from the original text is marked as inferred.
@@ -46,7 +46,7 @@ All reviewers receive one shared brief per round. Start from `assets/brief-templ
 - The stage criteria from `references/stage-criteria.md` and the issue standard.
 - The reviewer-to-focus table, from the reviewer specs; each reviewer applies its own row on top of the full review.
 
-Everything between agents is in English: the brief, the prompts, the reports, the issue record. Quote the user's original requests verbatim in whatever language they wrote them; translate nothing there. Only your final report to the user is in the user's language. Keep the template's fixed passages ("Your role", "Issue standard", "Done when") and the header lines as they are in the template, so every reviewer in every run reads the same instructions; the script parses report headers and hashes the brief but does not parse the brief.
+Everything between agents is in English: the brief, the prompts, the reports, the issue record. Quote the user's original requests verbatim in whatever language they wrote them; translate nothing there. Only your final report to the user is in the user's language. Keep the template's fixed passages ("Your role", "Issue standard", "Done when") and the header lines as they are in the template, so every reviewer in every run reads the same instructions; the script parses report headers, hashes the brief, and checks the brief's "Version under review" line against the stamp it records, but reads nothing else from the brief.
 
 ## Run the batch
 
@@ -69,7 +69,7 @@ Invariants the script enforces, which you keep when you act manually:
 - The `argv` Herdr launched is recorded per reviewer, with the pane's status line and process command line as corroboration where the harness exposes them. That is the evidence for harness, model, and reasoning level; a model's self-description is not.
 - A round counts a reviewer as done only when its report exists with header fields that exactly match this run, round, reviewer, stage, and version, and carry a single verdict token.
 - The manifest records the run's intent before the session server starts and every resource as soon as it exists, so an interrupted run can be inspected with `status` and finished with `cleanup`.
-- Every command that controls the session (`start`, `round`, `wait`, `cleanup`) first checks that the live session is the one this run created: same name, same session directory, and, while the session runs, the run's workspace still present. A started reviewer keeps its configuration for the whole run; `start` refuses to change or drop one silently.
+- Every command that controls the session (`start`, `round`, `wait`, `cleanup`) first checks that the live session is the one this run created: same name, same session directory, and, while the session runs, the run's workspace still present (a failed workspace query is reported as such, not as a mismatch). A started reviewer keeps its configuration for the whole run; `start` refuses to change or drop one silently.
 - Cleanup closes the reviewer panes it opened, then stops and deletes only that verified session.
 
 The default reviewer set lives in `assets/default-reviewers.json` (four reviewers: GPT-6 Astra and Claude Fable 5.1 and DeepSeek through pi, Gemini 4 Argon through Antigravity). A run keeps the set it started with; `start` without `--reviewers` on an existing run reuses that set and never falls back to the defaults. `references/reviewers.md` covers the spec format, per-harness arguments, and configuration evidence; read it when the user names a different set or a reviewer fails to start.
@@ -88,7 +88,7 @@ Report everything the reviewers surface that meets the evidence standard; the cl
 
 ## Finish
 
-Declare the stage complete only when the completion conditions in `references/issue-handling.md` hold. `collect` on the final round shows which reviewers have a valid report for the final version (same worktree stamp and same brief) and which do not.
+Declare the stage complete only when the completion conditions in `references/issue-handling.md` hold. `collect` on the final round shows, per report, whether it is valid for that round and still describes the current worktree and brief (`matches_current_version`); a `worktree_changed_since_round` or `brief_changed_since_round` of true means the final version has not been reviewed yet.
 
 Before ending or abandoning a batch, make sure the run directory holds the briefs, all reports, the issue record, and the manifest; these survive the session (the default location is reclaimed by the OS, so anything the user must keep goes into the final report or a `--run-dir` they chose). Then run `cleanup`. It closes the reviewer panes and removes only this run's session; business worktrees, branches, unsaved work, and other tasks' resources are never touched. Temporary worktrees or test resources you created for individual reviewers (`cwd` in their spec) are yours to remove afterwards; name any that remain. If something could not be cleaned, say which resource remains.
 

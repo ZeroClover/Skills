@@ -54,6 +54,10 @@ class Fail(Exception):
     pass
 
 
+class Unverified(Fail):
+    """A check could not be performed; it proves neither ownership nor mismatch."""
+
+
 # ----------------------------------------------------------------- helpers --
 
 def now():
@@ -237,7 +241,12 @@ def verify_session(m, require_running=True):
         return live
     mine = m.get("workspace")
     if mine:
-        ws = herdr(name, ["workspace", "list"], timeout=30, check=False).get("result", {}).get("workspaces", [])
+        answer = herdr(name, ["workspace", "list"], timeout=30, check=False)
+        if "error" in answer or "result" not in answer:
+            err = answer.get("error") or {"message": "no result in response"}
+            raise Unverified("workspace query failed (%s); ownership of session %s could not be verified, retry or check `herdr status`"
+                             % (err.get("code") or err.get("message"), name))
+        ws = answer["result"].get("workspaces", [])
         match = next((w for w in ws if w.get("workspace_id") == mine.get("workspace_id")), None)
         if match is None:
             raise Fail("refusing: live session does not contain this run's workspace %s" % mine.get("workspace_id"))
@@ -406,6 +415,8 @@ def preflight_model(spec):
         if harness == "pi" and model and "/" in model:
             provider, mid = model.split("/", 1)
             proc = run(["pi", "--offline", "--list-models", mid], timeout=60, check=False)
+            if proc.returncode != 0:
+                return "check_failed: exit %d: %s" % (proc.returncode, proc.stderr.strip()[-200:])
             for line in proc.stdout.splitlines():
                 cols = line.split()
                 if len(cols) >= 2 and cols[0] == provider and cols[1] == mid:
@@ -413,6 +424,8 @@ def preflight_model(spec):
             return "not_listed"
         if harness == "agy" and model:
             proc = run(["agy", "models"], timeout=60, check=False)
+            if proc.returncode != 0:
+                return "check_failed: exit %d: %s" % (proc.returncode, proc.stderr.strip()[-200:])
             ids = [l.split("\t")[0].strip() for l in proc.stdout.splitlines() if "\t" in l]
             return "listed" if model in ids else "not_listed"
     except Exception as exc:
@@ -532,6 +545,8 @@ def validate_specs(specs):
 
 def cmd_start(a):
     refuse_if_reviewer()
+    if not 1000 <= a.start_timeout_ms <= 300000:
+        raise Fail("--start-timeout-ms must be between 1000 and 300000 (herdr agent start caps at 300000)")
     m = load_manifest(a.run_dir)
     if not m.get("workspace"):
         raise Fail("run has no workspace recorded; init did not finish")
@@ -693,6 +708,16 @@ def check_report(path, m, rnd, name):
             "problems": problems, "size": os.path.getsize(path)}
 
 
+def brief_version_line(path):
+    """The stamp named in the brief header's "Version under review" line, if present."""
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            mt = re.match(r"^\s*[-*]?\s*\**Version under review\**\s*:\**\s*`?([^\s`(]+)", line)
+            if mt:
+                return mt.group(1).rstrip(".,;:)*")
+    return None
+
+
 def prompt_text(m, rnd, name, brief, report):
     rec = reviewer_rec(m, name) or {}
     ident = "%s / %s / %s" % (rec.get("harness"), rec.get("model"), rec.get("reasoning"))
@@ -826,6 +851,10 @@ def cmd_round(a):
         raise Fail("no started reviewer to prompt; run `start` first")
     os.makedirs(os.path.join(a.run_dir, "round-%d" % rnd), exist_ok=True)
     version = round_version(m, a.run_dir)
+    stated = brief_version_line(brief)
+    if stated and stated != version["stamp"]:
+        raise Fail("the brief says 'Version under review: %s' but the worktree stamp is now %s; "
+                   "regenerate the brief header (or revert the change) before prompting" % (stated, version["stamp"]))
     m["rounds"].append({"round": rnd, "brief": brief, "brief_sha256": sha256_file(brief), "version": version,
                         "reviewers": names, "prompted_at": now(), "timeout_min": a.timeout_min,
                         "prompts": {}, "results": {}})
@@ -869,6 +898,9 @@ def cmd_collect(a):
                "brief": rr["brief"], "reports": {}, "other_reviewers": {}}
     for name in rr["reviewers"]:
         summary["reports"][name] = check_report(report_path(a.run_dir, rnd, name), m, rnd, name)
+    current = round_version(m, a.run_dir)
+    wt_changed = current["stamp"] != rr["version"]["stamp"]
+    brief_changed = (not os.path.isfile(rr["brief"])) or sha256_file(rr["brief"]) != rr.get("brief_sha256")
     # reviewers started in this run but not asked in this round: where do they stand?
     for rec in m["reviewers"]:
         if rec["status"] != "started" or rec["name"] in rr["reviewers"]:
@@ -884,11 +916,12 @@ def cmd_collect(a):
         same_brief = bool(latest and latest["brief_sha256"] == rr.get("brief_sha256"))
         summary["other_reviewers"][rec["name"]] = {
             "latest_valid_report": latest, "same_worktree_version": same_wt, "same_brief": same_brief,
-            "reviewed_this_version": same_wt and same_brief}
-    current = round_version(m, a.run_dir)
+            "reviewed_this_version": same_wt and same_brief and not wt_changed and not brief_changed}
     summary["worktree_version_now"] = current["stamp"]
-    summary["worktree_changed_since_round"] = current["stamp"] != rr["version"]["stamp"]
-    summary["brief_changed_since_round"] = (not os.path.isfile(rr["brief"])) or sha256_file(rr["brief"]) != rr.get("brief_sha256")
+    summary["worktree_changed_since_round"] = wt_changed
+    summary["brief_changed_since_round"] = brief_changed
+    for rep in summary["reports"].values():  # valid for the round, and still describing the current worktree?
+        rep["matches_current_version"] = rep["status"] == "ok" and not wt_changed and not brief_changed
     path = os.path.join(a.run_dir, "round-%d" % rnd, "summary.json")
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2, ensure_ascii=False)
@@ -905,6 +938,8 @@ def cmd_status(a):
     try:  # read-only: a warning found here is printed, and persisted by the next control command
         verify_session(m, require_running=False)
         ownership = "ok" if live else "session absent"
+    except Unverified as exc:
+        ownership = "unverified: %s" % exc
     except Fail as exc:
         ownership = "mismatch: %s" % exc
     if ownership == "ok" and live.get("running"):  # never read inside a session that is not verified ours
@@ -1002,7 +1037,7 @@ def main(argv=None):
     s.add_argument("--run-dir", required=True)
     s.add_argument("--reviewers", help="JSON list of reviewer specs; omitted = this run's recorded set, "
                                        "or assets/default-reviewers.json for a new run")
-    s.add_argument("--start-timeout-ms", type=int, default=90000)
+    s.add_argument("--start-timeout-ms", type=int, default=90000, help="1000 to 300000 (Herdr's cap)")
     s.set_defaults(fn=cmd_start)
 
     s = sub.add_parser("round", help="record a round, prompt reviewers, wait for reports")

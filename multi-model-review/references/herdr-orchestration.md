@@ -24,7 +24,7 @@ herdr --session "$RUN" workspace create --cwd "$WORKTREE" --label "$RUN" --no-fo
       --env MMR_ROLE=reviewer --env MMR_RUN_ID="$RUN"
 herdr --session "$RUN" tab create --workspace w1 --cwd "$WORKTREE" --label astra --no-focus \
       --env MMR_ROLE=reviewer --env MMR_RUN_ID="$RUN"   # one tab per reviewer
-herdr --session "$RUN" agent start astra --kind pi --pane w1:p2 --timeout 90000 -- --model <provider/model> --thinking high
+herdr --session "$RUN" agent start astra --kind pi --pane w1:p2 --timeout 90000 -- --model <provider/model> --thinking high   # --timeout caps at 300000
 ```
 
 Facts verified on herdr 0.9.5:
@@ -40,7 +40,7 @@ Facts verified on herdr 0.9.5:
 
 A harness started in a directory it has not seen before shows a trust dialog. Seen on this machine: Antigravity "Do you trust the contents of this project?" (cursor on Yes), Codex "Trust this folder?" (cursor on "Trust and continue"), Claude Code "Yes, I trust this folder" (cursor on "No, exit" by default, so a bare Enter makes it quit). Herdr reports `agent_not_ready` with state `blocked`. The reviewed worktree is exactly what the reviewer is meant to read, so the script answers that dialog, and only that dialog (matched on its wording): it reads the screen, finds the cursor inside the option block next to the affirmative line, moves it there, confirms, waits for the harness to settle, and records `trust_prompt_answered: true` with the keys it sent and the state it settled in. If it cannot locate the options it presses nothing. Codex shows a splash screen after trusting that Herdr may report as `unknown`; the script accepts that state once the dialog is gone, and the first prompt of the round is the real readiness test. Any other startup dialog is left for you to inspect; the manifest keeps the screen text under `screen_at_failure`.
 
-Reviewer panes inherit `HERDR_ENV=1`, so a reviewer could technically issue herdr commands against this session. The brief forbids it; the script does not enforce it. Keep that in mind when reading a report that claims to have changed session state.
+Reviewer panes inherit `HERDR_ENV=1`, so a reviewer could technically issue herdr commands against this session. The brief limits reviewers to its authorized operations, which never include session-changing herdr commands; the script does not enforce that limit. Keep it in mind when reading a report that claims to have changed session state.
 
 ## Reading reviewer state
 
@@ -62,13 +62,30 @@ Lifecycle states: `working`, `idle`, `done`, `blocked`, `unknown`. A round resul
 `agent prompt <name> <text> --wait --timeout <ms>` submits the text and waits for the first settled state. Error codes:
 
 - `agent_blocked`: nothing was sent; a dialog is open. Inspect first.
-- `agent_prompt_stalled`: the text was written but no activity followed within five seconds. Read the pane; the prompt may be sitting unsent in the input box. Resend only after confirming it did not start (see below).
+- `agent_prompt_stalled`: Herdr accepted the submission, but the harness showed no `working` or `blocked` activity within five seconds. Read the pane: the harness may still be initializing, or it may have ignored the input. Resend only after confirming it did not start (see below).
 - `timeout`: the caller timeout expired while the agent was still working. The prompt was delivered. Continue with `review_run.py wait`; do not resubmit.
 - `cli_timeout` (script-level): the herdr CLI itself did not return. Check `herdr status` and `agent get` before anything else.
 
 `wait` without `--reprompt` returns at once for an agent that is already idle, which is what you want after a timeout (the report may already exist) and what tells you, after `stalled` or `blocked`, that nothing is running. Inspect the pane; if the task never started, `wait --round N --reviewers <name> --reprompt` sends the same prompt again (the text is generated deterministically from the manifest). The script refuses to prompt an agent that is still `working` (`busy_not_sent`): one request per reviewer at a time.
 
 Keep the prompt text short and point at the brief file; long briefs belong on disk, not in terminal input. Every prompt attempt is appended to the manifest under `rounds[].prompts[<name>]` at the moment it is made (text, `attempted_at`, `delivery: unknown`) and resolved when Herdr answers: `written` (Herdr reported the submission, or a later `timeout` or `stalled`, both of which happen after the text was written), `not_sent` (Herdr refused because the agent was blocked), or `unknown` (the CLI itself failed or timed out, so delivery cannot be confirmed). Earlier attempts keep their record when a reprompt is added. If the orchestrating process dies while a wait is in progress, the attempt stays `unknown`: Herdr never reported back, so the pane is the only evidence; read it before deciding whether to resend. `wait --reprompt` skips a reviewer whose valid report already exists, unless `--message` is given, because a correction is meant for a reviewer that already wrote something.
+
+## Result vocabulary
+
+`round` and `wait` store one result per reviewer under `rounds[].results[<name>].status` (and print it). The report check runs after the wait, so a reviewer that finished early can be `report_ready` even when the wait itself timed out. `round` also refuses to start when the brief's "Version under review" line differs from the stamp it is about to record, so a brief written before a late edit cannot send every reviewer the wrong version.
+
+| status | meaning | next step |
+|--------|---------|-----------|
+| `report_ready` | report exists with valid header fields for this run, round, reviewer, stage, version | nothing; triage the report |
+| `report_invalid` | report exists but a header field is wrong; `problems` lists which | correction via `wait --reprompt --reviewers <name> --message ...` |
+| `settled_no_report` | agent idle or done, no report file | read the pane; `--reprompt` if the task never started |
+| `blocked` | agent is on a dialog (at prompt time Herdr refused to send, or it settled on one later) | read the pane and decide; the latest attempt's `delivery` under `prompts` says whether the text went out |
+| `stalled` | text written, no activity within five seconds | read the pane; `--reprompt` only if nothing started |
+| `timeout` | wait expired while the agent was working (the text, if this call sent one, was delivered) | `wait` again |
+| `busy_not_sent` | agent still working on a previous request; nothing sent | `wait` without `--reprompt` |
+| `cli_timeout` / `error` | the herdr CLI itself failed; `detail` has the message | check `herdr status`, `agent get`, then `wait` |
+
+Each prompt attempt under `rounds[].prompts[<name>][]` records `text`, `attempted_at`, `delivery` (`written` / `not_sent` / `unknown`), and `result`, the raw outcome of that attempt's wait before the report check (`settled`, `timeout`, `stalled`, `blocked`, ...). A plain `wait` sends nothing, so its result carries `delivery: null`; delivery evidence always lives on the attempt. The interpreted outcome is the result status above.
 
 ## Two more continuations
 

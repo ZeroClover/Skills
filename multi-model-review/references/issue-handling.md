@@ -41,7 +41,7 @@ The stage is complete only when all of these hold:
 
 Unanimity is not required: reviewers do not have to withdraw preferences or state agreement. Herdr states (`idle`, `done`), a successful CLI exit, or a reviewer saying "done" do not replace these conditions.
 
-`collect` on the final round lists, under `other_reviewers`, every started reviewer that was not asked in that round, with whether its latest valid report matches the final round's worktree stamp and brief. A brief differs between rounds whenever requirements, scope, or authorized operations changed, so `reviewed_this_version: false` means that reviewer has not seen the final materials; either ask it in a final round or record explicitly why its earlier report still applies.
+`collect` on the final round lists, under `other_reviewers`, every started reviewer that was not asked in that round, with whether its latest valid report matches the final round's worktree stamp and brief and nothing has changed since (`reviewed_this_version`; the two comparisons are also reported separately as `same_worktree_version` and `same_brief`). A brief differs between rounds whenever requirements, scope, or authorized operations changed, so `reviewed_this_version: false` means that reviewer has not seen the final materials; either ask it in a final round or record explicitly why its earlier report still applies.
 
 ## Final report to the user
 
