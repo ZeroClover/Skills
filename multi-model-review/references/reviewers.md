@@ -4,13 +4,12 @@ Read this when choosing the reviewer set, when a reviewer fails to start, or whe
 
 ## Default set
 
-`assets/default-reviewers.json` holds the default four. They apply only when the user has not named harnesses or models for this review; an explicit user choice replaces the set, including reasoning levels. A run keeps the set it started with: `start` without `--reviewers` on an existing run reuses that set rather than the defaults.
+`assets/default-reviewers.json` holds the default three. They apply only when the user has not named harnesses or models for this review; an explicit user choice replaces the set, including reasoning levels. A run keeps the set it started with: `start` without `--reviewers` on an existing run reuses that set rather than the defaults.
 
 | Name | Harness | Model | Reasoning | Extra |
 |------|---------|-------|-----------|-------|
 | astra | pi | zero-aicoding-codex/gpt-6-astra | high | |
 | argon | agy (Antigravity CLI) | gemini-4-argon-high | high | `--dangerously-skip-permissions` |
-| fable | pi | zero-aicoding-claude/claude-fable-5-1 | high | |
 | deepseek | pi | ollama-cloud/deepseek-v4.1-flash:1017 | max | |
 
 The Antigravity flag only reduces approval dialogs inside that reviewer. It does not widen what the reviewer may do, which the brief defines, and it does not change any permission set on the outer task.

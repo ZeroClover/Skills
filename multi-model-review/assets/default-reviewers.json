@@ -15,13 +15,6 @@
     "focus": "boundaries and cross-module impact"
   },
   {
-    "name": "fable",
-    "harness": "pi",
-    "model": "zero-aicoding-claude/claude-fable-5-1",
-    "reasoning": "high",
-    "focus": "design consistency and scope control"
-  },
-  {
     "name": "deepseek",
     "harness": "pi",
     "model": "ollama-cloud/deepseek-v4.1-flash:1017",
