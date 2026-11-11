@@ -35,7 +35,7 @@ or a call into internals doesn't show that the feature works. The check must
 go through the code you're delivering, not a stub, demo, or test-only path.
 If no real check can run here, say which one you skipped and why instead of
 reporting the change as done. Throwaway scripts and print checks are fine for
-this; keep them out of the repository.
+this; keep them in `_tmpwork/` and out of commits.
 
 Write new tests only when the task or the project's instructions ask for
 them: tests an agent adds on its own restate its own reading of the
@@ -47,6 +47,41 @@ callers rely on and that could plausibly break. Tests of documentation,
 configuration, other tests, or code that only restate the implementation
 don't qualify. When an existing test fails, fix the code; change the test
 only when the task changes the behavior it checks.
+
+## Temporary files
+
+In a Git-tracked repository, put all task-local temporary files and scratch
+work—throwaway scripts, repro inputs, intermediate outputs, logs, and working
+notes—under `<worktree-root>/_tmpwork/`, creating the directory if needed. Do
+not use `/tmp` (aside from the shared `/tmp/repos` clone cache below),
+`$TMPDIR`, or harness-provided scratchpads and session directories: keeping
+scratch files in `_tmpwork/` keeps them inside the workspace boundary, visible
+to the user, and runnable against the project's toolchain.
+
+`_tmpwork/` is ignored by the global Git ignore configuration. Never commit its
+contents or add `_tmpwork/` to a project's `.gitignore`.
+
+## Project documentation and memory
+
+In a Git-tracked repository, record durable project conventions, architectural
+decisions, and non-obvious operational context in the project's `docs/`
+directory (creating `docs/` if needed) rather than in harness-level memory
+features (such as auto-memory or per-agent memory directories). Project
+knowledge belongs in version control where every tool and collaborator shares
+and reviews it, not in opaque local agent state.
+
+Follow progressive disclosure and keep `docs/` as current truth, never a
+running log:
+
+- Keep root instruction files (such as `AGENTS.md`) concise; put detailed
+  guidance into focused, topic-named files under `docs/` and link to them so
+  sessions load only the topics relevant to the task at hand. Lead each file
+  with the core rule or summary before supporting detail.
+- Record only durable knowledge that cannot be read directly from the code,
+  types, configuration, or `git log`.
+- Maintain documents in place as present-tense truth: update or remove
+  superseded statements instead of appending corrections, and never write
+  chronological session notes, debugging diaries, or task-by-task changelogs.
 
 ## SSH
 
