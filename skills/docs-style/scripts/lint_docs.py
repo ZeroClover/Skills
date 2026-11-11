@@ -2,7 +2,7 @@
 """Lint Markdown prose against Google developer documentation style rules.
 
 Usage:
-    uv run --project SKILL_PARENT python lint_docs.py PATH [PATH ...] [--json] [--strict] [--ignore-rules IDS]
+    uv run --project REPO_ROOT python lint_docs.py PATH [PATH ...] [--json] [--strict] [--ignore-rules IDS]
 
 Fenced code blocks and inline code are skipped. Each finding names the rule,
 the matched text, and the preferred wording.

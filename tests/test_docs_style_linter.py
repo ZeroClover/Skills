@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).parents[1] / "docs-style" / "scripts" / "lint_docs.py"
+SCRIPT_PATH = Path(__file__).parents[1] / "skills" / "docs-style" / "scripts" / "lint_docs.py"
 SPEC = importlib.util.spec_from_file_location("docs_style_linter", SCRIPT_PATH)
 assert SPEC and SPEC.loader
 LINTER = importlib.util.module_from_spec(SPEC)

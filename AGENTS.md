@@ -1,17 +1,23 @@
 # Repository Guidelines
 
-This repository stores local Codex skills. Each top-level skill directory should follow the standard skill layout:
+This repository stores reusable agent skills and global agent instructions:
 
 ```text
-skill-name/
-├── SKILL.md
-├── scripts/
-├── references/
-├── assets/
-└── ...
+.
+├── instructions/
+│   └── instructions.md
+└── skills/
+    └── <skill-name>/
+        ├── SKILL.md
+        ├── scripts/
+        ├── references/
+        ├── assets/
+        └── ...
 ```
 
-Only create optional directories when they contain files the skill actually needs.
+Only create optional directories inside a skill when they contain files the skill actually needs.
+
+Keep global instructions in `instructions/instructions.md`. Do not place `SKILL.md` in `instructions/` (so skill tooling never treats it as a skill), and do not name files in `instructions/` `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` (so agents do not auto-load them as directory-scoped workspace rules while editing).
 
 ## Python and uv
 
@@ -24,7 +30,7 @@ Only create optional directories when they contain files the skill actually need
 - Run Python tools with `uv run ...`, for example:
 
 ```bash
-uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py create-commit
+uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/create-commit
 ```
 
 ## Skill Maintenance
@@ -40,13 +46,13 @@ uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_vali
 After changing a skill, validate it from the repository root:
 
 ```bash
-uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-directory>
+uv run python /Users/zero/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/<skill-name>
 ```
 
 For shell helpers, also run syntax checks such as:
 
 ```bash
-bash -n <skill-directory>/scripts/<script>.sh
+bash -n skills/<skill-name>/scripts/<script>.sh
 ```
 
 ## Autonomous Execution and Boundaries

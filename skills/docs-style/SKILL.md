@@ -50,7 +50,7 @@ Treat the guide as editorial guidance. A consistent project-specific choice can 
 
    ```bash
    DOCS_STYLE_SKILL=/absolute/path/to/docs-style
-   uv run --project "$DOCS_STYLE_SKILL/.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" PATH
+   uv run --project "$DOCS_STYLE_SKILL/../.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" PATH
    ```
 
 4. Review each reported match in context. Apply the suggested wording when it improves accuracy and clarity.
@@ -80,9 +80,9 @@ Treat the guide as editorial guidance. A consistent project-specific choice can 
 
 ```bash
 DOCS_STYLE_SKILL=/absolute/path/to/docs-style
-uv run --project "$DOCS_STYLE_SKILL/.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/getting-started.md
-uv run --project "$DOCS_STYLE_SKILL/.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/ --json
-uv run --project "$DOCS_STYLE_SKILL/.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/ --strict --ignore-rules GDG-020
+uv run --project "$DOCS_STYLE_SKILL/../.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/getting-started.md
+uv run --project "$DOCS_STYLE_SKILL/../.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/ --json
+uv run --project "$DOCS_STYLE_SKILL/../.." python "$DOCS_STYLE_SKILL/scripts/lint_docs.py" docs/ --strict --ignore-rules GDG-020
 ```
 
 The exit code is 1 when errors are found, or when warnings are found with `--strict`. Treat each finding as a review prompt; the references and document context determine the final wording.
