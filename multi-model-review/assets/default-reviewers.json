@@ -7,12 +7,19 @@
     "focus": "requirement omissions and acceptance evidence"
   },
   {
-    "name": "argon",
+    "name": "carbon",
     "harness": "agy",
-    "model": "gemini-4-argon-high",
+    "model": "gemini-4-carbon-high",
     "reasoning": "high",
     "extra_args": ["--dangerously-skip-permissions"],
     "focus": "boundaries and cross-module impact"
+  },
+  {
+    "name": "fable",
+    "harness": "pi",
+    "model": "zero-aicoding-claude/claude-fable-5-2",
+    "reasoning": "high",
+    "focus": "design consistency and scope control"
   },
   {
     "name": "deepseek",

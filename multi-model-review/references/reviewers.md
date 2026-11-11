@@ -4,12 +4,13 @@ Read this when choosing the reviewer set, when a reviewer fails to start, or whe
 
 ## Default set
 
-`assets/default-reviewers.json` holds the default three. They apply only when the user has not named harnesses or models for this review; an explicit user choice replaces the set, including reasoning levels. A run keeps the set it started with: `start` without `--reviewers` on an existing run reuses that set rather than the defaults.
+`assets/default-reviewers.json` holds the default four. They apply only when the user has not named harnesses or models for this review; an explicit user choice replaces the set, including reasoning levels. A run keeps the set it started with: `start` without `--reviewers` on an existing run reuses that set rather than the defaults.
 
 | Name | Harness | Model | Reasoning | Extra |
 |------|---------|-------|-----------|-------|
 | astra | pi | zero-aicoding-codex/gpt-6-astra | high | |
-| argon | agy (Antigravity CLI) | gemini-4-argon-high | high | `--dangerously-skip-permissions` |
+| carbon | agy (Antigravity CLI) | gemini-4-carbon-high | high | `--dangerously-skip-permissions` |
+| fable | pi | zero-aicoding-claude/claude-fable-5-2 | high | |
 | deepseek | pi | ollama-cloud/deepseek-v4.1-flash:1017 | max | |
 
 The Antigravity flag only reduces approval dialogs inside that reviewer. It does not widen what the reviewer may do, which the brief defines, and it does not change any permission set on the outer task.
@@ -22,7 +23,7 @@ Pass `--reviewers <file>` to `review_run.py start` with a JSON list:
 [
   {"name": "astra", "harness": "pi", "model": "zero-aicoding-codex/gpt-6-astra", "reasoning": "high",
    "focus": "requirement omissions and acceptance evidence"},
-  {"name": "argon", "harness": "agy", "model": "gemini-4-argon-high", "reasoning": "high",
+  {"name": "carbon", "harness": "agy", "model": "gemini-4-carbon-high", "reasoning": "high",
    "extra_args": ["--dangerously-skip-permissions"]},
   {"name": "custom", "harness": "opencode", "model": "provider/model", "reasoning": "high",
    "args": ["--model", "provider/model", "--variant", "high"]}
@@ -49,7 +50,7 @@ Argument templates the script uses (all four verified on this machine through `h
 Evidence of what a reviewer runs, strongest first:
 
 1. `argv` returned by `agent start`, recorded in `manifest.json` under `reviewers[].argv` (`argv_source` indicates whether it came from Herdr's response or, after a trust dialog, from the requested arguments; `agent get` does not return `argv`, so after a dialog the requested arguments plus the status line are the strongest evidence available).
-2. The harness status line in the pane, for example `gpt-6-astra • high` in pi, `Gemini 4 Argon · high` in Antigravity, or `GPT-6-Astra high` in Codex; `start` stores the pane's last lines under `screen_after_start`.
+2. The harness status line in the pane, for example `gpt-6-astra • high` in pi, `Gemini 4 Carbon · high` in Antigravity, or `GPT-6-Astra high` in Codex; `start` stores the pane's last lines under `screen_after_start`.
 3. The process command line (`process_cmdline`), only where the harness keeps it: Antigravity does; pi rewrites it to a bare `pi`.
 4. Never the model's own statement about what it is.
 
