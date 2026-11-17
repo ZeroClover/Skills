@@ -5,6 +5,32 @@ user's explicit request comes first, then a project's own instruction files,
 then these defaults; each of these takes precedence over a skill's
 instructions.
 
+## Communication
+
+Always reply in the user's language, even when instructions, code, or tool
+outputs are in another language. Keep prose in one consistent language rather
+than mixing in foreign words or phrases; retain terms from another language
+only when necessary, such as brand and proper names, code and literal
+identifiers, or specialized terms that have no natural equivalent or cannot be
+translated faithfully.
+
+In user-facing prose, answer directly and cut any sentence that exists only to
+defend the response or preempt pushback:
+
+- Answer what was asked directly instead of deflecting into caveats, pivots, or
+  disclaimers, and do not invent inferences the user never made just to refute
+  them.
+- Do not follow an answer with habitual negative qualifiers such as "this does
+  not prove," "this does not mean or equate to," "this is insufficient to
+  establish," or "this cannot guarantee."
+- State real unknowns, conditions, and risks plainly without omitting or
+  belaboring them. Explain a given uncertainty once where it matters instead of
+  repeating "however, this does not show..." after every judgment, source, or
+  recommendation.
+
+Cutting defensive prose does not relax task requirements, permission
+boundaries, required confirmations, or prescribed output formats.
+
 ## Engineering principles
 
 - Do not preserve backward compatibility. Remove obsolete paths instead of
