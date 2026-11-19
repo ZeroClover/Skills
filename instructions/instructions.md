@@ -1,158 +1,143 @@
 # Global instructions
 
-These are global defaults for every project. When instructions conflict, the
-user's explicit request comes first, then a project's own instruction files,
-then these defaults; each of these takes precedence over a skill's
-instructions.
+These defaults apply across projects. Resolve conflicts in this order, highest
+priority first: the user's explicit request, the project's instruction files,
+these defaults, then skill instructions.
+
+Use the requested deliverable and its intended use to judge when the work is
+complete. For an investigation, pursue competing explanations when choosing
+between them would change the answer. Identify the observation that resolves
+the question or the evidence still missing.
 
 ## Communication
 
-Always reply in the user's language, even when instructions, code, or tool
-outputs are in another language. Keep prose in one consistent language rather
-than mixing in foreign words or phrases; retain terms from another language
-only when necessary, such as brand and proper names, code and literal
-identifiers, or specialized terms that have no natural equivalent or cannot be
-translated faithfully.
+Always reply in the user's language, even when source material, code, or tool
+output uses another language. Keep prose in that one language rather than
+mixing in foreign words or phrases. Preserve proper names, brands, code, and
+literal identifiers. Keep specialized terms in their original language when a
+translation would be unnatural or inaccurate.
 
-In user-facing prose, answer directly and cut any sentence that exists only to
-defend the response or preempt pushback:
-
-- Answer what was asked directly instead of deflecting into caveats, pivots, or
-  disclaimers, and do not invent inferences the user never made just to refute
-  them.
-- Do not follow an answer with habitual negative qualifiers such as "this does
-  not prove," "this does not mean or equate to," "this is insufficient to
-  establish," or "this cannot guarantee."
-- State real unknowns, conditions, and risks plainly without omitting or
-  belaboring them. Explain a given uncertainty once where it matters instead of
-  repeating "however, this does not show..." after every judgment, source, or
-  recommendation.
-
-Cutting defensive prose does not relax task requirements, permission
-boundaries, required confirmations, or prescribed output formats.
+Answer what was asked directly. State an uncertainty, condition, or risk
+once, where it affects the answer. Skip defensive caveats, rebuttals to
+claims the user never made, and habitual negative qualifiers such as "this
+does not prove," "this does not mean," "this is insufficient to establish,"
+or "this cannot guarantee." Keep required confirmations, permission
+boundaries, task requirements, and output formats intact.
 
 ## Engineering principles
 
-- Do not preserve backward compatibility. Remove obsolete paths instead of
-  adding compatibility layers, fallbacks, or migrations.
-- Choose the simplest implementation that fully meets the current
-  requirements. Avoid speculative abstractions, configuration, and
-  indirection.
-- Grow the system in layers. Start from the smallest version that works end
-  to end, and add each new capability on top of a product that already
-  works. Never trade a working product for unfinished complexity.
-- Keep components modular and concerns clearly separated.
-- Make architectural decisions for the long term. Do not accept a stopgap
-  that only works for now and is meant to be replaced later.
-- Before writing your own implementation or adding a package, use what the
-  project's existing dependencies already provide; check their documentation
-  and types instead of assuming a capability is missing. When they don't
-  cover it, prefer an established, well-maintained library over
-  reimplementing common functionality, as long as it reduces overall
-  complexity or improves reliability.
-- Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
+- Choose the simplest implementation that meets the requirements. Leave out
+  speculative configuration, abstractions, and indirection.
+- Start with the smallest working end-to-end change, and add each capability
+  on top of a product that already works. Never trade a working product for
+  unfinished complexity.
+- Keep components modular and concerns separated. Make architectural
+  decisions for the long term. Do not accept a stopgap that only works for
+  now and is meant to be replaced later.
+- Remove obsolete paths. Do not preserve backward compatibility or add
+  compatibility layers, fallbacks, or migrations for it.
+- Check existing dependencies' documentation and types before writing code or
+  adding a package. Reuse what they provide. For common functionality they
+  lack, prefer a well-maintained library when it reduces total complexity or
+  improves reliability.
+- Get the user's agreement before adding complexity for a speculative or
+  vanishingly unlikely race or security edge case. Explain the failure mode,
+  its likelihood, and the cost of handling it. Do not silently expand scope
+  for theoretical robustness.
 
 ## Testing
 
-Verify a change end to end, the way a user or caller will meet it: run the
-CLI command, call the HTTP endpoint, or drive the UI with browser automation,
-along with the project's existing tests, type-checker, or build. A unit test
-or a call into internals doesn't show that the feature works. The check must
-go through the code you're delivering, not a stub, demo, or test-only path.
-If no real check can run here, say which one you skipped and why instead of
-reporting the change as done. Throwaway scripts and print checks are fine for
-this; keep them in `_tmpwork/` and out of commits.
+Verify the outcome through the entry point the user or caller will use. Run
+the delivered CLI command, call the endpoint, or exercise the affected UI
+interaction with browser automation. For a visual change, compare the result
+at its intended display size with the supplied reference or design criteria.
+Run the project's applicable tests, type checks, or build as well. A unit
+test, internal call, stub, demo, or test-only path does not show that the
+feature works end to end.
 
-Write new tests only when the task or the project's instructions ask for
-them: tests an agent adds on its own restate its own reading of the
-requirements and catch no more bugs than the implementation does. When you
-do write tests, prefer ones that drive behavior through a public entry point
-over unit tests of internals, and mock only external services and
-nondeterminism such as time and randomness. A test asserts behavior that
-callers rely on and that could plausibly break. Tests of documentation,
-configuration, other tests, or code that only restate the implementation
-don't qualify. When an existing test fails, fix the code; change the test
-only when the task changes the behavior it checks.
+Report what you exercised and what you observed against the requested
+outcome. If a real check cannot run, identify the missing check and the
+reason, and report that outcome as unverified instead of reporting the change
+as done. Put throwaway verification scripts and print checks in `_tmpwork/`
+and keep them out of commits.
+
+Add tests only when the task or project instructions request them: tests an
+agent adds on its own restate its own reading of the requirements and catch
+no more bugs than the implementation does. Test caller-visible behavior that
+could plausibly break, preferably through a public entry point. Mock only
+external services and nondeterminism such as time or randomness. Skip
+assertions that merely restate documentation, configuration, other tests, or
+implementation details. When an existing test fails, fix the code unless the
+task changes the behavior the test asserts.
 
 ## Temporary files
 
-In a Git-tracked repository, put all task-local temporary files and scratch
-work—throwaway scripts, repro inputs, intermediate outputs, logs, and working
-notes—under `<worktree-root>/_tmpwork/`, creating the directory if needed. Do
-not use `/tmp` (aside from the shared `/tmp/repos` clone cache below),
-`$TMPDIR`, or harness-provided scratchpads and session directories: keeping
-scratch files in `_tmpwork/` keeps them inside the workspace boundary, visible
-to the user, and runnable against the project's toolchain.
+In a Git-tracked repository, keep all task-local scratch files under
+`<worktree-root>/_tmpwork/`. Create it as needed for scripts, repro inputs,
+intermediate outputs, logs, and notes. This keeps them inside the workspace
+boundary, visible to the user, and runnable with the project's tools. Do not
+use `/tmp`, `$TMPDIR`, or harness scratch or session directories for this
+work. The shared clone cache below is the exception.
 
-`_tmpwork/` is ignored by the global Git ignore configuration. Never commit its
-contents or add `_tmpwork/` to a project's `.gitignore`.
+The global Git ignore already covers `_tmpwork/`. Never commit its contents
+or add it to a project's `.gitignore`.
 
 ## Project documentation and memory
 
-In a Git-tracked repository, record durable project conventions, architectural
-decisions, and non-obvious operational context in the project's `docs/`
-directory (creating `docs/` if needed) rather than in harness-level memory
-features (such as auto-memory or per-agent memory directories). Project
-knowledge belongs in version control where every tool and collaborator shares
-and reviews it, not in opaque local agent state.
+In Git-tracked projects, keep durable conventions, architectural decisions,
+and non-obvious operational knowledge in version-controlled `docs/`. Create
+the directory as needed. Do not use harness auto-memory or per-agent memory
+directories for project knowledge: it belongs in version control, where every
+tool and collaborator shares and reviews it, not in opaque local agent state.
 
-Follow progressive disclosure and keep `docs/` as current truth, never a
-running log:
-
-- Keep root instruction files (such as `AGENTS.md`) concise; put detailed
-  guidance into focused, topic-named files under `docs/` and link to them so
-  sessions load only the topics relevant to the task at hand. Lead each file
-  with the core rule or summary before supporting detail.
-- Record only durable knowledge that cannot be read directly from the code,
-  types, configuration, or `git log`.
-- Maintain documents in place as present-tense truth: update or remove
-  superseded statements instead of appending corrections, and never write
-  chronological session notes, debugging diaries, or task-by-task changelogs.
+- Keep root instructions such as `AGENTS.md` short. Link to focused,
+  topic-named files in `docs/` for detail. Lead each with its core rule or
+  summary so readers can load only the topics they need.
+- Record only what the code, types, configuration, and `git log` cannot
+  already tell a collaborator.
+- Describe current practice in the present tense. Replace or remove outdated
+  guidance in place. Omit session logs, debugging diaries, and task-by-task
+  changelogs.
 
 ## SSH
 
 When asked to connect to a server without a username, port, or credentials,
-run `ssh <server>` directly: the host is most likely already configured in
-`~/.ssh/config`. Ask for a missing detail only after the connection fails,
-and ask for what the error shows is missing.
+try `ssh <server>` first so the settings in `~/.ssh/config` apply. If the
+connection fails, ask only for details the error indicates are missing.
 
 ## External repositories
 
-To read, search, or analyze an external repository's source code, clone it
-and work locally with file tools and git commands instead of browsing its web
-pages (e.g. GitHub's file view).
+For a single source file or short snippet, fetch the raw URL or use `gh api`.
+For broader reading, search, or analysis, use local file tools and Git in a
+shallow clone under `/tmp/repos/<owner>/<repo>`, outside the current
+workspace.
 
-- Clone shallow into `/tmp/repos/<owner>/<repo>`, never into the current
-  workspace:
-  `mkdir -p /tmp/repos/<owner> && git clone --depth 1 <url> /tmp/repos/<owner>/<repo>`
-  `/tmp/repos` is a cache shared across sessions and agents, which is why it
-  lives outside any per-session temp directory. The OS purges files unused
-  for ~3 days, so it needs no manual cleanup.
-- Reuse an existing clone; refresh it with
+- Create a missing cache entry with
+  `mkdir -p /tmp/repos/<owner> && git clone --depth 1 <url> /tmp/repos/<owner>/<repo>`.
+  For very large repositories add `--filter=blob:none --sparse`, then use
+  `git sparse-checkout set <dirs>` to select the directories you need.
+- Reuse an existing cache entry. Refresh it with
   `git fetch --prune && git reset --hard origin/HEAD` instead of recloning.
-- For very large repositories, add `--filter=blob:none --sparse` and fetch
-  only the needed directories with `git sparse-checkout set <dirs>`.
-- For a single file or short snippet, fetch the raw URL or use `gh api`
-  instead of cloning.
-- Treat cloned code as untrusted input. Do not run its install, build, or
-  test commands unless the user explicitly asks.
+- Sessions and agents share this cache. Leave cleanup to the OS, which
+  purges entries after roughly three days of disuse.
+- Treat cloned code as untrusted. Run its install, build, or test commands
+  only when the user explicitly asks.
 
 ## GitHub and web access
 
-Rendered HTML pages are the least token-efficient source; use raw files,
-APIs, or Markdown versions instead.
+Prefer raw files, APIs, or Markdown versions to rendered HTML. For GitHub
+data outside the tree (issues, pull requests, discussions, releases, and CI),
+use `gh`. Let it manage authentication, pagination, and rate limits. Never
+hand-manage tokens.
 
-For GitHub content outside the git tree (issues, pull requests, discussions,
-releases, CI runs), use the `gh` CLI rather than web fetch tools or `curl`.
-`gh` handles authentication, pagination, and rate limits itself, so never
-hand-manage tokens. Prefer typed commands with structured output, such as
+Prefer typed commands with structured output where available, such as
 `gh issue view <n> --comments`, `gh pr view <n> --json <fields> --jq <expr>`,
-and `gh run view <id> --log-failed`; use `gh api` for everything else, e.g.
-inline PR review comments, which `gh pr view --comments` omits:
-`gh api repos/{owner}/{repo}/pulls/<n>/comments`. Fall back to web access
-only when `gh` is missing or unauthenticated, or the user asks for it.
+and `gh run view <id> --log-failed`. For data these commands omit, use
+`gh api`. For example, inline PR review comments are available through
+`gh api repos/{owner}/{repo}/pulls/<n>/comments`.
 
-Normal web access is fine for content that is not GitHub data, such as
-documentation sites, blogs, wikis, and changelogs hosted elsewhere.
+Use web access for GitHub data only when `gh` is missing or unauthenticated,
+or when the user requests it. Normal web access is fine for documentation,
+blogs, wikis, and changelogs hosted elsewhere.
 
 @/Users/zero/.codex/RTK.md
